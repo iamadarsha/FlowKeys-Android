@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Audio Recording Permission -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Network Access for Cloud Acceleration & Translation (Groq) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Overlay Window Permission for Floating Pill -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Optional Contact Vocabulary Learning for Regional Names -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- Foreground Service Permissions (Android 14+ Microhone FGS) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Package Visibility for Native On-Device Speech Recognition (Android 11+) -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <package android:name="com.google.android.tts" />
+    </queries>
+
+    <application
+        android:name=".FlowKeysApplication"
+        android:allowBackup="false"
+        android:largeHeap="true"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FlowKeys">
+
+        <!-- Main UI Launcher (Settings / Playground / Dashboard) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Onboarding & Prominent Disclosure Activity -->
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false" />
+
+        <!-- Core Accessibility Service for Focus Detection & Text Insertion -->
+        <service
+            android:name=".accessibility.FlowKeysAccessibilityService"
+            android:exported="true"
+            android:label="@string/accessibility_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- Transient Microphone Foreground Service (Direct Touch Activated) -->
+        <service
+            android:name=".recording.DictationRecordingService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+    </application>
+
+</manifest>

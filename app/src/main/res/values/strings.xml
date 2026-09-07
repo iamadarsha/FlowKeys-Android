@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">FlowKeys</string>
+    <string name="accessibility_service_description">FlowKeys uses Android Accessibility solely to detect when you focus an editable text box and insert dictated text directly into that field. FlowKeys never reads passwords, private messages, or unrelated screen content.</string>
+    <string name="accessibility_service_label">FlowKeys Dictation Service</string>
+    <string name="notification_channel_name">FlowKeys Dictation</string>
+    <string name="notification_channel_description">Active voice recording and dictation status</string>
+    <string name="notification_recording_title">FlowKeys is listening…</string>
+    <string name="notification_recording_text">Tap the floating bubble or notification to finish.</string>
+</resources>

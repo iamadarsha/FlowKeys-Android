@@ -349,14 +349,14 @@ fun PlaygroundScreen() {
                         onClick = { FlowKeysCoordinator.setScriptMode(ScriptMode.TRANSLATED_ENGLISH) }
                     )
                     ScriptModeButton(
-                        label = "Native Script",
+                        label = "Native",
                         sublabel = if (selectedLang == Language.BENGALI) "বাংলা" else if (selectedLang == Language.HINDI) "हिन्दी" else "English",
                         isSelected = scriptMode == ScriptMode.NATIVE_SCRIPT,
                         modifier = Modifier.weight(1f),
                         onClick = { FlowKeysCoordinator.setScriptMode(ScriptMode.NATIVE_SCRIPT) }
                     )
                     ScriptModeButton(
-                        label = "Latin Script",
+                        label = "Latin",
                         sublabel = if (selectedLang == Language.BENGALI) "Benglish" else "Hinglish",
                         isSelected = scriptMode == ScriptMode.PHONETIC_LATIN,
                         modifier = Modifier.weight(1f),
@@ -402,7 +402,7 @@ fun PlaygroundScreen() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TranslationModeButton(
-                        label = "Auto (Script Mode)",
+                        label = "Auto (Script)",
                         isSelected = translationMode == TranslationEngine.TranslationMode.DIRECT_DICTATION,
                         modifier = Modifier.weight(1f),
                         onClick = {
@@ -645,7 +645,7 @@ private fun ScriptModeButton(
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 10.dp),
+            .padding(horizontal = 4.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -653,7 +653,7 @@ private fun ScriptModeButton(
                 text = label,
                 color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                fontSize = 12.sp,
+                fontSize = 11.5.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -685,14 +685,14 @@ private fun TranslationModeButton(
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = 6.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             color = if (isSelected) StitchAccentCoral else StitchTextSecondary,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

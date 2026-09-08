@@ -38,7 +38,16 @@ object PersonalDictionary {
         "(?i)\\baadhaar\\b" to "Aadhaar",
         "(?i)\\bwhatsapp\\b" to "WhatsApp",
         "(?i)\\binstagram\\b" to "Instagram",
-        "(?i)\\btelegram\\b" to "Telegram"
+        "(?i)\\btelegram\\b" to "Telegram",
+        "(?i)\\bblinkit\\b" to "Blinkit",
+        "(?i)\\bzepto\\b" to "Zepto",
+        "(?i)\\binstamart\\b" to "Instamart",
+        "(?i)\\bcred\\b" to "CRED",
+        "(?i)\\bgemini\\b" to "Gemini",
+        "(?i)\\bchatgpt\\b" to "ChatGPT",
+        "(?i)\\bdeepseek\\b" to "DeepSeek",
+        "(?i)\\bgroq\\b" to "Groq",
+        "(?i)\\bclaude\\b" to "Claude"
     )
 
     private val userCustomWords = ConcurrentHashMap<String, String>()

@@ -225,7 +225,7 @@ fun HistoryScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 FilterChipItem(
                     label = "All (${allItems.size})",
@@ -233,17 +233,17 @@ fun HistoryScreen() {
                     onClick = { selectedFilter = "all" }
                 )
                 FilterChipItem(
-                    label = "বাংলা (BN)",
+                    label = "বাংলা",
                     isSelected = selectedFilter == "bn",
                     onClick = { selectedFilter = "bn" }
                 )
                 FilterChipItem(
-                    label = "हिंदी (HI)",
+                    label = "हिंदी",
                     isSelected = selectedFilter == "hi",
                     onClick = { selectedFilter = "hi" }
                 )
                 FilterChipItem(
-                    label = "English (EN)",
+                    label = "English",
                     isSelected = selectedFilter == "en",
                     onClick = { selectedFilter = "en" }
                 )
@@ -294,21 +294,21 @@ fun FilterChipItem(
 ) {
     Box(
         modifier = Modifier
-            .heightIn(min = 40.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .heightIn(min = 36.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(if (isSelected) StitchAccentCoral else StitchSurface2)
             .border(
                 1.dp,
                 if (isSelected) StitchAccentPeach else StitchBorderSubtle,
-                RoundedCornerShape(20.dp)
+                RoundedCornerShape(18.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             color = if (isSelected) Color.White else StitchTextSecondary
         )

@@ -212,21 +212,18 @@ private fun Screen1Welcome(onNext: () -> Unit) {
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        // Progress Header
+        // Top Brand Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(StitchAccentCoral),
                     contentAlignment = Alignment.Center
@@ -238,10 +235,11 @@ private fun Screen1Welcome(onNext: () -> Unit) {
                         modifier = Modifier.size(18.dp)
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "FlowKeys",
                     color = StitchTextPrimary,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = (-0.2).sp
                 )
@@ -250,9 +248,9 @@ private fun Screen1Welcome(onNext: () -> Unit) {
             // Step Badge
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(StitchSurface2)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = "01 / 04",
@@ -263,148 +261,148 @@ private fun Screen1Welcome(onNext: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Editorial Headline
         Text(
             text = "Speak naturally.\nFlowKeys writes it.",
             color = StitchTextPrimary,
-            fontSize = 32.sp,
-            lineHeight = 38.sp,
+            fontSize = 21.sp,
+            lineHeight = 26.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.5).sp
+            letterSpacing = (-0.3).sp
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Turn your voice into clean, ready-to-send text in any app — without replacing your existing keyboard.",
             color = StitchTextSecondary,
-            fontSize = 15.sp,
-            lineHeight = 22.sp
+            fontSize = 12.sp,
+            lineHeight = 16.sp
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Language Support Micro-Pill
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .background(StitchSurface1)
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(20.dp))
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+                .padding(horizontal = 9.dp, vertical = 3.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = null,
                     tint = StitchSuccess,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(12.dp)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "English  •  हिंदी  •  বাংলা",
                     color = StitchTextPrimary,
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
                     text = "On-Device AI",
                     color = StitchTextMuted,
-                    fontSize = 11.sp
+                    fontSize = 10.sp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        // Hero Demonstration Phone Card Mockup
+        // Hero Demonstration Phone Card Mockup (Compact High-Fidelity)
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurfaceRecessed),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(16.dp))
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(8.dp)) {
                 // Chat header
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(7.dp))
                         .background(StitchSurface1)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(20.dp)
                                 .clip(CircleShape)
                                 .background(StitchAccentCoral.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("A", color = StitchAccentCoral, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("A", color = StitchAccentCoral, fontWeight = FontWeight.Bold, fontSize = 10.sp)
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Column {
-                            Text("Aarav Sharma", color = StitchTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                            Text("online", color = StitchSuccess, fontSize = 10.sp)
+                            Text("Aarav Sharma", color = StitchTextPrimary, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
+                            Text("online", color = StitchSuccess, fontSize = 8.5.sp)
                         }
                     }
-                    Text("WhatsApp", color = StitchTextMuted, fontSize = 10.sp)
+                    Text("WhatsApp", color = StitchTextMuted, fontSize = 9.sp)
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
                 // Chat bubble incoming
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(StitchSurface2)
-                        .padding(10.dp)
+                        .padding(horizontal = 7.dp, vertical = 5.dp)
                 ) {
                     Text(
-                        text = "Can you send the project summary before the 4 PM team sync?",
+                        text = "Can you send the project summary before sync?",
                         color = StitchTextSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
+                        fontSize = 10.5.sp,
+                        lineHeight = 14.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
-                // Chat bubble outgoing
+                // Outgoing bubble with voice draft
                 Box(
                     modifier = Modifier
                         .align(Alignment.End)
                         .fillMaxWidth(0.85f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(StitchAccentCoral.copy(alpha = 0.15f))
-                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                        .padding(10.dp)
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 7.dp, vertical = 5.dp)
                 ) {
                     Text(
-                        text = "Drafting it right now via voice, give me two minutes!",
+                        text = "Drafting it now via voice, give me two minutes!",
                         color = StitchAccentPeach,
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
+                        fontSize = 10.5.sp,
+                        lineHeight = 14.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // FLOATING FLOWKEYS PILL ABOVE KEYBOARD MOCKUP
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(18.dp))
                         .background(StitchSurface3)
-                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -414,24 +412,24 @@ private fun Screen1Welcome(onNext: () -> Unit) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(22.dp)
                                     .clip(CircleShape)
                                     .background(StitchAccentCoral),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
                             // Waveform bars
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val heights = listOf(8, 16, 20, 12, 18, 14, 10)
+                                val heights = listOf(6, 12, 16, 10, 14, 11, 8)
                                 heights.forEach { h ->
                                     Box(
                                         modifier = Modifier
-                                            .width(3.dp)
+                                            .width(2.dp)
                                             .height(h.dp)
                                             .clip(RoundedCornerShape(2.dp))
                                             .background(StitchAccentCoral)
@@ -442,14 +440,14 @@ private fun Screen1Welcome(onNext: () -> Unit) {
 
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(9.dp))
                                 .background(StitchSurface1)
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                .padding(horizontal = 5.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "LISTENING…",
                                 color = StitchSuccess,
-                                fontSize = 10.sp,
+                                fontSize = 8.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
@@ -457,68 +455,68 @@ private fun Screen1Welcome(onNext: () -> Unit) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
                 // Simulated keyboard bar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(StitchSurface1)
-                        .padding(8.dp),
+                        .padding(vertical = 4.dp, horizontal = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "⌨  Gboard / System Keyboard Stays Active",
                         color = StitchTextMuted,
-                        fontSize = 11.sp
+                        fontSize = 9.5.sp
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Equation Badge
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .background(StitchSurface1)
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
-                .padding(vertical = 10.dp, horizontal = 14.dp),
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(8.dp))
+                .padding(vertical = 5.dp, horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Keyboard, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.height(2.dp))
-                Text("Your Keyboard", color = StitchTextSecondary, fontSize = 11.sp)
+                Icon(Icons.Default.Keyboard, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.height(1.dp))
+                Text("Your Keyboard", color = StitchTextSecondary, fontSize = 9.5.sp)
             }
-            Text("+", color = StitchTextMuted, fontSize = 14.sp)
+            Text("+", color = StitchTextMuted, fontSize = 11.sp)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Mic, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.height(2.dp))
-                Text("FlowKeys AI", color = StitchAccentCoral, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Icon(Icons.Default.Mic, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.height(1.dp))
+                Text("FlowKeys AI", color = StitchAccentCoral, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold)
             }
-            Text("=", color = StitchTextMuted, fontSize = 14.sp)
+            Text("=", color = StitchTextMuted, fontSize = 11.sp)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.height(2.dp))
-                Text("Clean Text", color = StitchSuccess, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.height(1.dp))
+                Text("Clean Text", color = StitchSuccess, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Primary CTA Button
+        // Primary CTA Button (Always visible without scrolling)
         Button(
             onClick = onNext,
             colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .height(46.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -527,7 +525,7 @@ private fun Screen1Welcome(onNext: () -> Unit) {
                 Text(
                     text = "Get started",
                     color = Color.White,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -535,7 +533,7 @@ private fun Screen1Welcome(onNext: () -> Unit) {
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
@@ -547,16 +545,16 @@ private fun Screen1Welcome(onNext: () -> Unit) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Lock, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+            Icon(Icons.Default.Lock, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(12.dp))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "100% private. Speech processed locally on device.",
                 color = StitchTextMuted,
-                fontSize = 11.sp
+                fontSize = 10.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -576,7 +574,7 @@ private fun Screen2Language(
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Header with Back and Indicator
         Row(
@@ -584,15 +582,15 @@ private fun Screen2Language(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary)
+            IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary, modifier = Modifier.size(18.dp))
             }
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(StitchSurface2)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = 9.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = "02 / 04",
@@ -603,43 +601,43 @@ private fun Screen2Language(
             }
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.GraphicEq, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(15.dp))
-            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.Default.GraphicEq, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Text(
                 text = "ACOUSTIC TUNING",
                 color = StitchSuccess,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.8.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Make FlowKeys\nsound like you.",
             color = StitchTextPrimary,
-            fontSize = 30.sp,
-            lineHeight = 36.sp,
+            fontSize = 22.sp,
+            lineHeight = 27.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.5).sp
+            letterSpacing = (-0.4).sp
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Choose your primary language. FlowKeys learns your frequently used words and names privately on your phone.",
+            color = StitchTextSecondary,
+            fontSize = 12.sp,
+            lineHeight = 17.sp
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = "Choose what you want FlowKeys to write. It can learn the words, names and phrases you use most — privately on your phone.",
-            color = StitchTextSecondary,
-            fontSize = 14.sp,
-            lineHeight = 21.sp
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Language Cards
+        // Language Cards (Compact 48-50dp height)
         LanguageOptionCard(
             title = "English",
             scriptBadge = "Global",
@@ -649,7 +647,7 @@ private fun Screen2Language(
             onSelect = { onSelectLanguage(Language.ENGLISH) }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         LanguageOptionCard(
             title = "हिंदी",
@@ -661,7 +659,7 @@ private fun Screen2Language(
             onSelect = { onSelectLanguage(Language.HINDI) }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         LanguageOptionCard(
             title = "বাংলা",
@@ -673,83 +671,83 @@ private fun Screen2Language(
             onSelect = { onSelectLanguage(Language.BENGALI) }
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Privacy & Local Learning Architecture Node
+        // Privacy & Local Learning Architecture Node (Compact)
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
         ) {
-            Column(modifier = Modifier.padding(14.dp)) {
+            Column(modifier = Modifier.padding(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(26.dp)
                             .clip(CircleShape)
                             .background(StitchSuccess.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Shield, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Shield, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(15.dp))
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "Learns locally",
                                 color = StitchTextPrimary,
-                                fontSize = 14.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(6.dp)
+                                    .size(5.dp)
                                     .clip(CircleShape)
                                     .background(StitchSuccess)
                             )
                         }
                         Text(
-                            text = "FlowKeys remembers frequently used words and your corrections without needing your contacts.",
+                            text = "Remembers frequent words & corrections without sending data off your phone.",
                             color = StitchTextSecondary,
-                            fontSize = 12.sp,
-                            lineHeight = 17.sp
+                            fontSize = 11.sp,
+                            lineHeight = 15.sp
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(StitchSurface2)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Memory, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.Memory, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Private Neural Core", color = StitchTextMuted, fontSize = 11.sp)
+                        Text("Private Neural Core", color = StitchTextMuted, fontSize = 10.sp)
                     }
-                    Text("0 kB sent to cloud", color = StitchSuccess, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    Text("0 kB sent to cloud", color = StitchSuccess, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = onNext,
             colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .height(48.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -758,7 +756,7 @@ private fun Screen2Language(
                 Text(
                     text = "Continue",
                     color = Color.White,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -766,23 +764,23 @@ private fun Screen2Language(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "YOU CAN SWITCH SCRIPTS & LANGUAGES ANYTIME",
             color = StitchTextMuted,
-            fontSize = 10.sp,
+            fontSize = 9.sp,
             letterSpacing = 0.5.sp,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -800,47 +798,50 @@ private fun LanguageOptionCard(
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) StitchSurface2 else StitchSurface1
         ),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = if (isSelected) 1.5.dp else 1.dp,
                 color = if (isSelected) StitchAccentCoral else StitchBorderSubtle,
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(12.dp)
             )
             .clickable { onSelect() }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(8.dp))
                         .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.18f) else StitchSurface3),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = symbol,
                         color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = title,
                             color = StitchTextPrimary,
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         if (subtitle != null) {
@@ -848,31 +849,29 @@ private fun LanguageOptionCard(
                             Text(
                                 text = subtitle,
                                 color = StitchTextMuted,
-                                fontSize = 13.sp
+                                fontSize = 12.sp
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.2f) else StitchSurface3)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .padding(horizontal = 5.dp, vertical = 1.dp)
                         ) {
                             Text(
                                 text = scriptBadge.uppercase(),
                                 color = if (isSelected) StitchAccentCoral else StitchTextMuted,
-                                fontSize = 9.sp,
+                                fontSize = 8.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(2.dp))
-
                     Text(
                         text = samplePhrase,
                         color = StitchTextSecondary,
-                        fontSize = 13.sp,
+                        fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -881,14 +880,14 @@ private fun LanguageOptionCard(
 
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(20.dp)
                     .clip(CircleShape)
                     .background(if (isSelected) StitchAccentCoral else StitchSurface3)
                     .border(1.dp, if (isSelected) StitchAccentCoral else StitchBorderSubtle, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 if (isSelected) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
                 }
             }
         }
@@ -916,7 +915,7 @@ private fun Screen3PrivacyPermissions(
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Progress Header
         Row(
@@ -924,15 +923,15 @@ private fun Screen3PrivacyPermissions(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary)
+            IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary, modifier = Modifier.size(18.dp))
             }
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(StitchSurface2)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = 9.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = "03 / 04",
@@ -943,101 +942,100 @@ private fun Screen3PrivacyPermissions(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "Private by default.\nReady anywhere.",
             color = StitchTextPrimary,
-            fontSize = 30.sp,
-            lineHeight = 36.sp,
+            fontSize = 22.sp,
+            lineHeight = 27.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.5).sp
+            letterSpacing = (-0.4).sp
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "FlowKeys needs permissions so the floating bubble can appear above your keyboard and insert dictated text.",
+            color = StitchTextSecondary,
+            fontSize = 12.sp,
+            lineHeight = 17.sp
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = "FlowKeys needs a few Android permissions so the bubble can appear above your keyboard and place your words where you type.",
-            color = StitchTextSecondary,
-            fontSize = 14.sp,
-            lineHeight = 21.sp
-        )
-
-        Spacer(modifier = Modifier.height(22.dp))
-
-        // Permission Stack
+        // Permission Stack (Compact 48dp min touch targets)
         PermissionCard(
             title = "Microphone",
-            subtitle = "To hear what you say for speech dictation.",
+            subtitle = "Records audio for speech dictation.",
             icon = Icons.Default.Mic,
             isGranted = hasMic,
             actionLabel = "Grant",
             onAction = onRequestMic
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         PermissionCard(
             title = "Accessibility",
-            subtitle = "Detects active text field & types directly into it.",
+            subtitle = "Detects active text field & types into it.",
             icon = Icons.Default.TextFields,
             isGranted = hasAccessibility,
             actionLabel = "Enable",
             onAction = onRequestAccessibility
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         PermissionCard(
             title = "Floating Bubble",
-            subtitle = "Shows FlowKeys micro-pill docked right above keyboard.",
+            subtitle = "Shows micro-pill docked above keyboard.",
             icon = Icons.Default.BubbleChart,
             isGranted = hasOverlay,
             actionLabel = "Allow",
             onAction = onRequestOverlay
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Architecture & Data Card
+        // Architecture & Data Privacy Card (Compact)
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
         ) {
             Row(
-                modifier = Modifier.padding(14.dp),
-                verticalAlignment = Alignment.Top
+                modifier = Modifier.padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.VerifiedUser,
                     contentDescription = null,
                     tint = StitchSuccess,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "ARCHITECTURE & DATA PRIVACY",
+                        text = "ZERO TELEMETRY GUARANTEE",
                         color = StitchTextPrimary,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "• FlowKeys NEVER reads passwords, PINs, or OTPs\n• FlowKeys NEVER monitors typing outside dictation\n• On-device processing ensures zero speech data leaves your phone without your explicit cloud key.",
+                        text = "• Passwords/PINs never read  • No typing tracked outside mic\n• 100% on-device processing by default",
                         color = StitchTextSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 18.sp
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         val allGranted = hasMic && hasOverlay && hasAccessibility
 
@@ -1046,10 +1044,10 @@ private fun Screen3PrivacyPermissions(
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (allGranted) StitchAccentCoral else StitchSurface3
             ),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .height(48.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1058,7 +1056,7 @@ private fun Screen3PrivacyPermissions(
                 Text(
                     text = if (allGranted) "Set up FlowKeys" else "Continue with Setup",
                     color = Color.White,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -1066,23 +1064,23 @@ private fun Screen3PrivacyPermissions(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "CONFIGURABLE ANYTIME IN APP SETTINGS",
             color = StitchTextMuted,
-            fontSize = 10.sp,
+            fontSize = 9.sp,
             letterSpacing = 0.5.sp,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -1097,19 +1095,19 @@ private fun PermissionCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
                 color = if (isGranted) StitchSuccess.copy(alpha = 0.4f) else StitchBorderSubtle,
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(12.dp)
             )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(horizontal = 10.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -1119,8 +1117,8 @@ private fun PermissionCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
                         .background(if (isGranted) StitchSuccess.copy(alpha = 0.15f) else StitchSurface2),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1128,43 +1126,41 @@ private fun PermissionCard(
                         imageVector = icon,
                         contentDescription = null,
                         tint = if (isGranted) StitchSuccess else StitchAccentCoral,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = title,
                             color = StitchTextPrimary,
-                            fontSize = 15.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(if (isGranted) StitchSuccess.copy(alpha = 0.2f) else StitchSurface3)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .padding(horizontal = 5.dp, vertical = 1.dp)
                         ) {
                             Text(
                                 text = if (isGranted) "ACTIVE" else "REQUIRED",
                                 color = if (isGranted) StitchSuccess else StitchTextMuted,
-                                fontSize = 9.sp,
+                                fontSize = 8.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(2.dp))
-
                     Text(
                         text = subtitle,
                         color = StitchTextSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp
                     )
                 }
             }
@@ -1176,19 +1172,20 @@ private fun PermissionCard(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Active",
                     tint = StitchSuccess,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             } else {
                 Button(
                     onClick = onAction,
                     colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(30.dp)
                 ) {
                     Text(
                         text = actionLabel,
                         color = Color.White,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -1225,7 +1222,7 @@ private fun Screen4FirstSuccess(
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Progress Header
         Row(
@@ -1241,7 +1238,7 @@ private fun Screen4FirstSuccess(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .background(StitchSurface2)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = 10.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = "04 / 04",
@@ -1252,64 +1249,64 @@ private fun Screen4FirstSuccess(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(15.dp))
-            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(13.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "EXPERIENCE MAGIC",
                 color = StitchAccentCoral,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Now, let's try it.",
             color = StitchTextPrimary,
-            fontSize = 32.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.5).sp
+            letterSpacing = (-0.3).sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Open any text field, tap the FlowKeys bubble, and speak normally.",
             color = StitchTextSecondary,
-            fontSize = 14.sp,
-            lineHeight = 21.sp
+            fontSize = 12.sp,
+            lineHeight = 17.sp
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Live Multilingual Simulation Card
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurfaceRecessed),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(14.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(16.dp))
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
         ) {
-            Column(modifier = Modifier.padding(14.dp)) {
+            Column(modifier = Modifier.padding(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("TARGET LANGUAGE", color = StitchTextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("TARGET LANGUAGE", color = StitchTextMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Bolt, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(12.dp))
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text("Zero Cloud Delay", color = StitchSuccess, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                        Icon(Icons.Default.Bolt, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(11.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Zero Cloud Delay", color = StitchSuccess, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // Selector tabs
                 Row(
@@ -1317,7 +1314,7 @@ private fun Screen4FirstSuccess(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(StitchSurface1)
-                        .padding(4.dp),
+                        .padding(3.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     listOf(
@@ -1332,73 +1329,73 @@ private fun Screen4FirstSuccess(
                                 .clip(RoundedCornerShape(6.dp))
                                 .background(if (isSelected) StitchAccentCoral else Color.Transparent)
                                 .clickable { demoLang = code }
-                                .padding(vertical = 6.dp),
+                                .padding(vertical = 4.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = title,
                                     color = if (isSelected) Color.White else StitchTextPrimary,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = sub,
-                                    color = if (isSelected) Color.White.copy(alpha = 0.8f) else StitchTextMuted,
-                                    fontSize = 10.sp
+                                    color = if (isSelected) Color.White.copy(alpha = 0.85f) else StitchTextMuted,
+                                    fontSize = 9.sp
                                 )
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Real Input Box Area
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(StitchSurface1)
-                        .border(1.dp, StitchBorderSubtle, RoundedCornerShape(10.dp))
-                        .padding(12.dp)
+                        .border(1.dp, StitchBorderSubtle, RoundedCornerShape(8.dp))
+                        .padding(8.dp)
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = sampleText,
                                 color = StitchTextPrimary,
-                                fontSize = 15.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Box(
                                 modifier = Modifier
                                     .width(2.dp)
-                                    .height(16.dp)
+                                    .height(14.dp)
                                     .background(StitchAccentCoral)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = sampleMeta,
                             color = StitchTextMuted,
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             modifier = Modifier.align(Alignment.End)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Floating FlowKeys Dynamic Micro-Interaction Pill
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(StitchSurface3)
-                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -1408,23 +1405,23 @@ private fun Screen4FirstSuccess(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(24.dp)
                                     .clip(CircleShape)
                                     .background(StitchAccentCoral),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.5.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val heights = listOf(10, 18, 24, 14, 20, 16, 8)
+                                val heights = listOf(8, 14, 18, 10, 16, 12, 6)
                                 heights.forEach { h ->
                                     Box(
                                         modifier = Modifier
-                                            .width(3.dp)
+                                            .width(2.5.dp)
                                             .height(h.dp)
                                             .clip(RoundedCornerShape(2.dp))
                                             .background(StitchAccentCoral)
@@ -1435,14 +1432,14 @@ private fun Screen4FirstSuccess(
 
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(StitchSurface1)
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "${demoLang.uppercase()} • STREAMING",
                                 color = StitchSuccess,
-                                fontSize = 10.sp,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
@@ -1450,7 +1447,7 @@ private fun Screen4FirstSuccess(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // Realistic keyboard mockup bar
                 Box(
@@ -1458,50 +1455,50 @@ private fun Screen4FirstSuccess(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
                         .background(StitchSurface1)
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 5.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Q  W  E  R  T  Y  U  I  O  P",
                         color = StitchTextMuted,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
-                        letterSpacing = 2.sp
+                        letterSpacing = 1.5.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // Engine ready card
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(StitchSurface1)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Whisper-Engine Ready", color = StitchTextSecondary, fontSize = 11.sp)
+                        Text("Whisper-Engine Ready", color = StitchTextSecondary, fontSize = 10.sp)
                     }
-                    Text("Model: 42 MB • On-Device", color = StitchTextMuted, fontSize = 10.sp)
+                    Text("Model: 42 MB • On-Device", color = StitchTextMuted, fontSize = 9.sp)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Bottom CTA Button
         Button(
             onClick = onComplete,
             colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .height(48.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1510,7 +1507,7 @@ private fun Screen4FirstSuccess(
                 Text(
                     text = "Start using FlowKeys",
                     color = Color.White,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -1518,12 +1515,12 @@ private fun Screen4FirstSuccess(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "You can change everything later in Settings.",
@@ -1533,7 +1530,7 @@ private fun Screen4FirstSuccess(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 

@@ -99,13 +99,29 @@ FlowKeys is designed from the ground up for low-end and mid-range Android hardwa
 
 ---
 
-## 📸 In-App Interface & Settings
+## 📱 Senior UI/UX Showcase: Zero-Scroll Adaptive Onboarding
+
+Engineered to the `/ui-ux-pro-max` design standard: **100% viewport adaptation** across all Android screen dimensions (from 360x640dp compact phones up to 1440x3120 flagship displays). Every primary CTA button and interaction surface is visible above the fold with zero scrolling required:
 
 <div align="center">
 
-| Gboard Active (Docked Capsule) | Text Injected via Accessibility | Settings & Live Provider Status |
-| :---: | :---: | :---: |
-| <img src="assets/demo_keyboard_docked.png" width="240" /> | <img src="assets/demo_text_injected.png" width="240" /> | <img src="assets/settings_gemini_live.png" width="240" /> |
+| Screen 1: The Value Promise | Screen 2: Acoustic Tuning | Screen 3: Zero Telemetry Privacy | Screen 4: Multilingual Simulator |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/screen1_welcome.png" width="220" /> | <img src="docs/screenshots/screen2_language.png" width="220" /> | <img src="docs/screenshots/screen3_privacy.png" width="220" /> | <img src="docs/screenshots/screen4_simulation.png" width="220" /> |
+| *Hero chat mockup & keyboard sync* | *Bengali/Hindi/English selection* | *Cryptographic sandboxing guarantee* | *Interactive streaming trial with live audio* |
+
+</div>
+
+---
+
+## 🎨 Clean Ergonomics: Main Interface & Playground
+
+<div align="center">
+
+| Dictate / Playground | Explicit Translation Override | Encrypted Transcript History | Models & Neural Engine |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/playground_main.png" width="220" /> | <img src="docs/screenshots/playground_translation.png" width="220" /> | <img src="docs/screenshots/history.png" width="220" /> | <img src="docs/screenshots/models.png" width="220" /> |
+| *Native & Latin script selectors* | *Direct tri-directional override* | *Single-row responsive filter chips* | *Hardware DSP & on-device packs* |
 
 </div>
 

@@ -307,6 +307,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkFirstRun() {
+        val prefs = getSharedPreferences("flowkeys_app_state", MODE_PRIVATE)
+        val onboardingDone = prefs.getBoolean("onboarding_done", false)
+        if (onboardingDone) return
+
         val hasOverlay = Settings.canDrawOverlays(this)
         val hasMic = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         val serviceName = "$packageName/com.flowkeys.android.accessibility.FlowKeysAccessibilityService"

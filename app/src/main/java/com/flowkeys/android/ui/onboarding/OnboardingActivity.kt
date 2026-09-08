@@ -13,6 +13,10 @@ class OnboardingActivity : ComponentActivity() {
             FlowKeysTheme {
                 OnboardingScreen(
                     onFinished = {
+                        getSharedPreferences("flowkeys_app_state", MODE_PRIVATE)
+                            .edit()
+                            .putBoolean("onboarding_done", true)
+                            .apply()
                         finish()
                     }
                 )

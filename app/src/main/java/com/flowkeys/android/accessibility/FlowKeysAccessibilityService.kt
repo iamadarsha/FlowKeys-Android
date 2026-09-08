@@ -22,6 +22,46 @@ import kotlinx.coroutines.*
  */
 class FlowKeysAccessibilityService : AccessibilityService() {
 
+    companion object {
+        fun isEnabled(context: android.content.Context): Boolean {
+            val am = context.getSystemService(android.content.Context.ACCESSIBILITY_SERVICE) as? android.view.accessibility.AccessibilityManager
+            val enabledList = am?.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            if (enabledList?.any { it.resolveInfo?.serviceInfo?.name?.contains("FlowKeysAccessibilityService") == true } == true) {
+                return true
+            }
+            val enabledServices = Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            ) ?: return false
+            return enabledServices.contains("FlowKeysAccessibilityService")
+        }
+
+        fun openSettings(context: android.content.Context) {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                try {
+                    context.startActivity(Intent(Settings.ACTION_SETTINGS).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                } catch (ignored: Exception) {}
+            }
+        }
+
+        fun openAppInfo(context: android.content.Context) {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.parse("package:${context.packageName}")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            try {
+                context.startActivity(intent)
+            } catch (ignored: Exception) {}
+        }
+    }
+
     private lateinit var overlayManager: FloatingPillManager
     private var pendingFocusNode: AccessibilityNodeInfo? = null
     private var pendingPackageName: String = ""

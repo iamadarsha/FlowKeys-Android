@@ -186,8 +186,15 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                         context.startActivity(intent)
                     },
                     onRequestAccessibility = {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        context.startActivity(intent)
+                        android.widget.Toast.makeText(
+                            context,
+                            "Tap 'FlowKeys Dictation Service' and turn the switch ON",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                        com.flowkeys.android.accessibility.FlowKeysAccessibilityService.openSettings(context)
+                    },
+                    onRequestAppInfo = {
+                        com.flowkeys.android.accessibility.FlowKeysAccessibilityService.openAppInfo(context)
                     },
                     onBack = { currentStep = 2 },
                     onNext = { currentStep = 4 }
@@ -906,6 +913,7 @@ private fun Screen3PrivacyPermissions(
     onRequestMic: () -> Unit,
     onRequestOverlay: () -> Unit,
     onRequestAccessibility: () -> Unit,
+    onRequestAppInfo: () -> Unit,
     onBack: () -> Unit,
     onNext: () -> Unit
 ) {
@@ -967,7 +975,7 @@ private fun Screen3PrivacyPermissions(
         // Permission Stack (Compact 48dp min touch targets)
         PermissionCard(
             title = "Microphone",
-            subtitle = "Records audio for speech dictation.",
+            subtitle = "Records audio for instant voice dictation.",
             icon = Icons.Default.Mic,
             isGranted = hasMic,
             actionLabel = "Grant",
@@ -977,8 +985,8 @@ private fun Screen3PrivacyPermissions(
         Spacer(modifier = Modifier.height(6.dp))
 
         PermissionCard(
-            title = "Accessibility",
-            subtitle = "Detects active text field & types into it.",
+            title = "Accessibility Service",
+            subtitle = "Required: Detects keyboard & types text into WhatsApp/apps.",
             icon = Icons.Default.TextFields,
             isGranted = hasAccessibility,
             actionLabel = "Enable",
@@ -989,12 +997,53 @@ private fun Screen3PrivacyPermissions(
 
         PermissionCard(
             title = "Floating Bubble",
-            subtitle = "Shows micro-pill docked above keyboard.",
+            subtitle = "Required: Shows sleek mic pill docked over keyboard.",
             icon = Icons.Default.BubbleChart,
             isGranted = hasOverlay,
             actionLabel = "Allow",
             onAction = onRequestOverlay
         )
+
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !hasAccessibility) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = StitchSurface2),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("🔒", fontSize = 13.sp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Android 13+ Restricted Setting Notice",
+                            color = StitchAccentPeach,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "If FlowKeys switch is grayed out in Accessibility Settings:\n1. Tap 'Open App Info' below\n2. Tap the ⋮ (three dots) in top-right corner\n3. Tap 'Allow restricted settings'\n4. Return and turn FlowKeys ON",
+                        color = StitchTextSecondary,
+                        fontSize = 10.5.sp,
+                        lineHeight = 15.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Button(
+                        onClick = onRequestAppInfo,
+                        colors = ButtonDefaults.buttonColors(containerColor = StitchSurface3),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth().height(32.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text("Open App Info (Allow Restricted)", color = StitchTextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -1039,10 +1088,17 @@ private fun Screen3PrivacyPermissions(
 
         val allGranted = hasMic && hasOverlay && hasAccessibility
 
+        val (btnText, btnAction) = when {
+            !hasAccessibility -> "Enable Accessibility in Settings" to onRequestAccessibility
+            !hasOverlay -> "Enable Floating Bubble" to onRequestOverlay
+            !hasMic -> "Grant Microphone Permission" to onRequestMic
+            else -> "Set up FlowKeys" to onNext
+        }
+
         Button(
-            onClick = onNext,
+            onClick = btnAction,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (allGranted) StitchAccentCoral else StitchSurface3
+                containerColor = StitchAccentCoral
             ),
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier
@@ -1054,9 +1110,9 @@ private fun Screen3PrivacyPermissions(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = if (allGranted) "Set up FlowKeys" else "Continue with Setup",
+                    text = btnText,
                     color = Color.White,
-                    fontSize = 15.sp,
+                    fontSize = 14.5.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -1535,10 +1591,6 @@ private fun Screen4FirstSuccess(
 }
 
 private fun isAccessibilityEnabled(context: Context): Boolean {
-    val serviceName = "${context.packageName}/com.flowkeys.android.accessibility.FlowKeysAccessibilityService"
-    val enabledServices = Settings.Secure.getString(
-        context.contentResolver,
-        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-    ) ?: return false
-    return enabledServices.contains(serviceName)
+    return com.flowkeys.android.accessibility.FlowKeysAccessibilityService.isEnabled(context)
 }
+

@@ -181,9 +181,12 @@ class FloatingPillView @JvmOverloads constructor(
         val w = width.toFloat()
         val h = height.toFloat()
         val cornerRadius = h / 2f
-        val unit = (h / 46f).coerceAtLeast(1f)
+        val density = context.resources.displayMetrics.density
+        // Responsive unit scaled to new compact 34dp height (-30% size)
+        val unit = density * (h / (34f * density)).coerceIn(0.5f, 1.2f) * 0.74f
 
-        rectF.set(4f, 4f, w - 4f, h - 4f)
+        rectF.set(2.5f, 2.5f, w - 2.5f, h - 2.5f)
+        borderPaint.strokeWidth = 2.4f
 
         // 1. Draw pill background & border
         canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, backgroundPaint)
@@ -199,12 +202,12 @@ class FloatingPillView @JvmOverloads constructor(
             }
             is DictationState.Success -> {
                 textPaint.color = Color.parseColor("#10B981")
-                textPaint.textSize = 24f * unit
+                textPaint.textSize = 18f * unit
                 canvas.drawText("✓", w / 2f, h / 2f - (textPaint.descent() + textPaint.ascent()) / 2, textPaint)
             }
             is DictationState.Error -> {
                 textPaint.color = Color.parseColor("#F43F5E")
-                textPaint.textSize = 24f * unit
+                textPaint.textSize = 18f * unit
                 canvas.drawText("!", w / 2f, h / 2f - (textPaint.descent() + textPaint.ascent()) / 2, textPaint)
             }
             else -> {
@@ -239,41 +242,42 @@ class FloatingPillView @JvmOverloads constructor(
 
         textPaint.color = Color.parseColor("#F8FAFC")
         val isLongText = langCode.length > 3
-        textPaint.textSize = if (isLongText) 10.5f * unit else 14.5f * unit
+        textPaint.textSize = if (isLongText) 9.0f * unit else 12.0f * unit
         val textWidth = textPaint.measureText(langCode)
 
-        // Vector microphone dimensions
-        val micW = 8.5f * unit
-        val micH = 12.5f * unit
-        val gap = 5.5f * unit
+        // Vector microphone dimensions scaled for 34dp height
+        val micW = 7.5f * unit
+        val micH = 11.5f * unit
+        val gap = 4.5f * unit
         val totalW = micW + gap + textWidth
         val startX = (w - totalW) / 2f
         val cy = h / 2f
 
         // Draw Vector Mic
         val micCenterX = startX + micW / 2f
-        val capsuleRadius = 3.0f * unit
+        val capsuleRadius = 2.4f * unit
         micCapsuleRect.set(
             micCenterX - capsuleRadius,
-            cy - 6.5f * unit,
+            cy - 5.5f * unit,
             micCenterX + capsuleRadius,
-            cy + 2f * unit
+            cy + 1.8f * unit
         )
         canvas.drawRoundRect(micCapsuleRect, capsuleRadius, capsuleRadius, micPaint)
 
         // Cradle arc
-        val cradleRadius = 5.0f * unit
+        val cradleRadius = 4.2f * unit
         micCradleRect.set(
             micCenterX - cradleRadius,
-            cy - 4.5f * unit,
+            cy - 3.8f * unit,
             micCenterX + cradleRadius,
-            cy + 4f * unit
+            cy + 3.4f * unit
         )
+        micStrokePaint.strokeWidth = 2.2f
         canvas.drawArc(micCradleRect, 0f, 180f, false, micStrokePaint)
 
         // Stem & Base
-        canvas.drawLine(micCenterX, cy + 4f * unit, micCenterX, cy + 6.5f * unit, micStrokePaint)
-        canvas.drawLine(micCenterX - 3.5f * unit, cy + 6.5f * unit, micCenterX + 3.5f * unit, cy + 6.5f * unit, micStrokePaint)
+        canvas.drawLine(micCenterX, cy + 3.4f * unit, micCenterX, cy + 5.5f * unit, micStrokePaint)
+        canvas.drawLine(micCenterX - 3.0f * unit, cy + 5.5f * unit, micCenterX + 3.0f * unit, cy + 5.5f * unit, micStrokePaint)
 
         // Draw Language / Mode Badge Text
         val textCenterX = startX + micW + gap + (textWidth / 2f)
@@ -284,21 +288,21 @@ class FloatingPillView @JvmOverloads constructor(
     private fun drawWaveform(canvas: Canvas, w: Float, h: Float, level: Float, unit: Float) {
         val centerY = h / 2f
         val barCount = 5
-        val barSpacing = 12f * unit
+        val barSpacing = 9f * unit
         val startX = (w - ((barCount - 1) * barSpacing)) / 2f
 
-        waveformPaint.strokeWidth = 4.5f * unit
+        waveformPaint.strokeWidth = 3.2f * unit
         for (i in 0 until barCount) {
             val x = startX + (i * barSpacing)
             val waveMod = sin(Math.toRadians((waveformPhase + (i * 45)).toDouble())).toFloat()
-            val dynamicHeight = (8f * unit + (level * 28f * unit) * (0.5f + 0.5f * waveMod)).coerceIn(6f * unit, h * 0.65f)
+            val dynamicHeight = (6f * unit + (level * 22f * unit) * (0.5f + 0.5f * waveMod)).coerceIn(5f * unit, h * 0.65f)
             canvas.drawLine(x, centerY - dynamicHeight / 2f, x, centerY + dynamicHeight / 2f, waveformPaint)
         }
     }
 
     private fun drawProcessingGlow(canvas: Canvas, w: Float, h: Float) {
         textPaint.color = Color.parseColor("#F59E0B")
-        textPaint.textSize = 18f
+        textPaint.textSize = 14f
         val dots = when ((waveformPhase / 90).toInt() % 4) {
             0 -> "●"
             1 -> "● ●"

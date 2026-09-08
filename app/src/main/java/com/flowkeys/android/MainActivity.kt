@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CloudDownload
@@ -72,6 +73,9 @@ import com.flowkeys.android.ui.theme.StitchTextSecondary
 
 class MainActivity : ComponentActivity() {
 
+    private val hasAccessibilityState = mutableStateOf(false)
+    private val hasOverlayState = mutableStateOf(true)
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -84,6 +88,8 @@ class MainActivity : ComponentActivity() {
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
+        hasAccessibilityState.value = com.flowkeys.android.accessibility.FlowKeysAccessibilityService.isEnabled(this)
+        hasOverlayState.value = Settings.canDrawOverlays(this)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +102,9 @@ class MainActivity : ComponentActivity() {
                 var showDiagnostics by remember { mutableStateOf(false) }
                 var showStats by remember { mutableStateOf(false) }
                 var showLearnedVocab by remember { mutableStateOf(false) }
+
+                val hasAccessibility by hasAccessibilityState
+                val hasOverlay by hasOverlayState
 
                 val isSubScreen = showDiagnostics || showStats || showLearnedVocab
                 val subScreenTitle = when {
@@ -264,22 +273,54 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)) {
-                        when {
-                            showDiagnostics -> DiagnosticsScreen()
-                            showStats -> com.flowkeys.android.ui.stats.StatsScreen()
-                            showLearnedVocab -> com.flowkeys.android.ui.dictionary.LearnedVocabularyScreen()
-                            else -> {
-                                when (selectedTab) {
-                                    0 -> PlaygroundScreen()
-                                    1 -> HistoryScreen()
-                                    2 -> OfflineModelsScreen()
-                                    3 -> SettingsScreen(
-                                        onNavigateToDiagnostics = { showDiagnostics = true },
-                                        onNavigateToStats = { showStats = true },
-                                        onNavigateToLearnedVocab = { showLearnedVocab = true }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        if (!hasAccessibility) {
+                            AccessibilityAlertBanner(
+                                onOpenSettings = {
+                                    android.widget.Toast.makeText(
+                                        this@MainActivity,
+                                        "Select 'FlowKeys Dictation Service' and turn switch ON",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                    com.flowkeys.android.accessibility.FlowKeysAccessibilityService.openSettings(this@MainActivity)
+                                },
+                                onOpenAppInfo = {
+                                    com.flowkeys.android.accessibility.FlowKeysAccessibilityService.openAppInfo(this@MainActivity)
+                                }
+                            )
+                        } else if (!hasOverlay) {
+                            OverlayAlertBanner(
+                                onOpenSettings = {
+                                    val intent = Intent(
+                                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        android.net.Uri.parse("package:$packageName")
                                     )
-                                    else -> PlaygroundScreen()
+                                    startActivity(intent)
+                                }
+                            )
+                        }
+
+                        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                            when {
+                                showDiagnostics -> DiagnosticsScreen()
+                                showStats -> com.flowkeys.android.ui.stats.StatsScreen()
+                                showLearnedVocab -> com.flowkeys.android.ui.dictionary.LearnedVocabularyScreen()
+                                else -> {
+                                    when (selectedTab) {
+                                        0 -> PlaygroundScreen()
+                                        1 -> HistoryScreen()
+                                        2 -> OfflineModelsScreen()
+                                        3 -> SettingsScreen(
+                                            onNavigateToDiagnostics = { showDiagnostics = true },
+                                            onNavigateToStats = { showStats = true },
+                                            onNavigateToLearnedVocab = { showLearnedVocab = true }
+                                        )
+                                        else -> PlaygroundScreen()
+                                    }
                                 }
                             }
                         }
@@ -295,16 +336,121 @@ class MainActivity : ComponentActivity() {
     private fun checkFirstRun() {
         val prefs = getSharedPreferences("flowkeys_app_state", MODE_PRIVATE)
         val onboardingDone = prefs.getBoolean("onboarding_done", false)
-        if (onboardingDone) return
-
         val hasOverlay = Settings.canDrawOverlays(this)
         val hasMic = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        val serviceName = "$packageName/com.flowkeys.android.accessibility.FlowKeysAccessibilityService"
-        val enabledServices = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
-        val hasAccessibility = enabledServices.contains(serviceName)
+        val hasAccessibility = com.flowkeys.android.accessibility.FlowKeysAccessibilityService.isEnabled(this)
 
-        if (!hasOverlay || !hasMic || !hasAccessibility) {
+        if (!onboardingDone || !hasOverlay || !hasMic || !hasAccessibility) {
             startActivity(Intent(this, OnboardingActivity::class.java))
         }
     }
 }
+
+@Composable
+private fun AccessibilityAlertBanner(
+    onOpenSettings: () -> Unit,
+    onOpenAppInfo: () -> Unit
+) {
+    androidx.compose.material3.Card(
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = Color(0xFF2E1A1A)
+        ),
+        shape = RoundedCornerShape(0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 1.dp, color = Color(0xFFEF4444).copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("⚠️", fontSize = 14.sp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Accessibility Service is OFF",
+                    color = Color(0xFFFCA5A5),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                text = "FlowKeys cannot detect keyboards or insert voice dictation in WhatsApp without Accessibility enabled.",
+                color = StitchTextSecondary,
+                fontSize = 11.sp,
+                lineHeight = 15.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+            ) {
+                androidx.compose.material3.Button(
+                    onClick = onOpenSettings,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = FlowKeysAccent),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text("Turn ON in Settings", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+
+                if (android.os.Build.VERSION.SDK_INT >= 33) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = onOpenAppInfo,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f))
+                    ) {
+                        Text("Allow Restricted (⋮)", color = Color(0xFFFCA5A5), fontSize = 11.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OverlayAlertBanner(onOpenSettings: () -> Unit) {
+    androidx.compose.material3.Card(
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = Color(0xFF2A241A)
+        ),
+        shape = RoundedCornerShape(0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 1.dp, color = Color(0xFFF59E0B).copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Floating Bubble Permission Needed",
+                    color = Color(0xFFFDE68A),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.5.sp
+                )
+                Text(
+                    text = "Allow FlowKeys to draw over other apps.",
+                    color = StitchTextSecondary,
+                    fontSize = 10.5.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            androidx.compose.material3.Button(
+                onClick = onOpenSettings,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B)),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Text("Allow", color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+

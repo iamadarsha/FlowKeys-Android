@@ -45,8 +45,8 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         gravity = Gravity.TOP or Gravity.START
-        width = dpToPx(96)
-        height = dpToPx(46)
+        width = dpToPx(70)
+        height = dpToPx(34)
         x = 0
         y = dpToPx(300)
     }

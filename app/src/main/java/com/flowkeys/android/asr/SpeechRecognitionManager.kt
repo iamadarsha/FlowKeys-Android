@@ -265,7 +265,9 @@ class SpeechRecognitionManager(private val context: Context) {
                                 val floatArray = audioBuffer.toFloatArray()
                                 val wavBytes = AudioEncoder.encodeToWav(floatArray)
                                 val hedgeDelay = dataStore.hedgeDelayMs.first().toLong()
-                                val vocabHints = com.flowkeys.android.dictionary.LearnedVocabularyStore.getTopHints(activeLanguage, limit = 12)
+                                val indicLexiconHints = com.flowkeys.android.dictionary.IndicSpeechLexicon2026.getVocabHints(activeLanguage, limit = 16)
+                                val learnedHints = com.flowkeys.android.dictionary.LearnedVocabularyStore.getTopHints(activeLanguage, limit = 8)
+                                val vocabHints = (indicLexiconHints + learnedHints).distinct()
 
                                 val primaryCall: (suspend () -> String?)? = if (!currentGeminiKey.isNullOrBlank() && qualityMode == com.flowkeys.android.data.DataStoreManager.ProcessingQualityMode.BEST_QUALITY) {
                                     {
@@ -280,7 +282,11 @@ class SpeechRecognitionManager(private val context: Context) {
 
                                 val secondaryCall: (suspend () -> String?)? = if (!currentKey.isNullOrBlank()) {
                                     {
-                                        GroqSpeechProvider(currentKey).transcribe(wavBytes, activeLanguage)
+                                        GroqSpeechProvider(currentKey).transcribe(
+                                            wavBytes,
+                                            activeLanguage,
+                                            prompt = vocabHints.joinToString(", ")
+                                        )
                                     }
                                 } else null
 

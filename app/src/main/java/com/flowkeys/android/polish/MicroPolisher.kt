@@ -54,6 +54,9 @@ object MicroPolisher {
             Language.ENGLISH -> EnglishPolisher.polish(text)
         }
 
+        // 5b. Indic 2026 Speech Disambiguation & Homophone Normalization
+        text = com.flowkeys.android.dictionary.IndicSpeechLexicon2026.disambiguate(text, language)
+
         // 6. Indian Numbering, Currency & Time Normalization
         text = IndianNumberNormalizer.normalize(text, language)
 

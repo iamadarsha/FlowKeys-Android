@@ -27,7 +27,10 @@ interface CloudTextPolisher {
 class GroqSpeechProvider(private val apiKey: String?) : CloudSpeechProvider {
     override val providerName = "Groq (Whisper-large-v3-turbo)"
 
-    override suspend fun transcribe(audio: ByteArray, language: Language): String? = withContext(Dispatchers.IO) {
+    override suspend fun transcribe(audio: ByteArray, language: Language): String? =
+        transcribe(audio, language, null)
+
+    suspend fun transcribe(audio: ByteArray, language: Language, prompt: String? = null): String? = withContext(Dispatchers.IO) {
         if (apiKey.isNullOrBlank()) return@withContext null
         try {
             val url = URL("https://api.groq.com/openai/v1/audio/transcriptions")
@@ -61,6 +64,12 @@ class GroqSpeechProvider(private val apiKey: String?) : CloudSpeechProvider {
             writer.append("Content-Disposition: form-data; name=\"language\"").append(crlf).append(crlf)
             writer.append(languageCode).append(crlf)
             
+            if (!prompt.isNullOrBlank()) {
+                writer.append(twoHyphens).append(boundary).append(crlf)
+                writer.append("Content-Disposition: form-data; name=\"prompt\"").append(crlf).append(crlf)
+                writer.append(prompt).append(crlf)
+            }
+
             writer.append(twoHyphens).append(boundary).append(crlf)
             writer.append("Content-Disposition: form-data; name=\"response_format\"").append(crlf).append(crlf)
             writer.append("json").append(crlf)

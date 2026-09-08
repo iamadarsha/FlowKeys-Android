@@ -54,6 +54,7 @@ object FlowKeysCoordinator {
         val dsm = com.flowkeys.android.data.DataStoreManager(appContext)
         dataStoreManager = dsm
         com.flowkeys.android.dictionary.LearnedVocabularyStore.initialize(appContext)
+        com.flowkeys.android.dictionary.IndicSpeechLexicon2026.initialize(appContext, deviceTier)
         com.flowkeys.android.stats.LocalStatsRepository.initialize(appContext)
         scope.launch {
             dsm.isLearnedVocabEnabled.collect { enabled ->

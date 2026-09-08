@@ -107,7 +107,7 @@ class FlowKeysAccessibilityService : AccessibilityService() {
     }
 
     private fun ensureOverlayAttached() {
-        if (!overlayManager.isAttached && Settings.canDrawOverlays(this)) {
+        if (!overlayManager.isAttached) {
             overlayManager.attach()
         }
     }

@@ -2,7 +2,6 @@ package com.flowkeys.android.ui.diagnostics
 
 import android.content.Context
 import android.os.Build
-import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -145,11 +144,10 @@ fun DiagnosticsScreen() {
                     statusColor = if (isServiceActive) StitchSuccess else StitchError
                 )
 
-                val hasOverlay = Settings.canDrawOverlays(context)
                 DiagnosticRow(
-                    label = "Overlay Window",
-                    value = if (hasOverlay) "GRANTED" else "MISSING",
-                    statusColor = if (hasOverlay) StitchSuccess else StitchError
+                    label = "Pill Overlay Engine",
+                    value = if (isServiceActive) "ACTIVE (A11Y)" else "OFFLINE",
+                    statusColor = if (isServiceActive) StitchSuccess else StitchWarning
                 )
 
                 val hasDisk = modelManager.hasSufficientDiskSpace()

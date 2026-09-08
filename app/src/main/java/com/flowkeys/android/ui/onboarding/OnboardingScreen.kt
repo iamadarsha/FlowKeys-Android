@@ -119,9 +119,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         )
     }
-    var hasOverlayPermission by remember {
-        mutableStateOf(Settings.canDrawOverlays(context))
-    }
     var hasAccessibilityPermission by remember {
         mutableStateOf(isAccessibilityEnabled(context))
     }
@@ -130,7 +127,6 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 hasMicPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-                hasOverlayPermission = Settings.canDrawOverlays(context)
                 hasAccessibilityPermission = isAccessibilityEnabled(context)
             }
         }
@@ -175,16 +171,8 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 3 -> Screen3PrivacyPermissions(
                     context = context,
                     hasMic = hasMicPermission,
-                    hasOverlay = hasOverlayPermission,
                     hasAccessibility = hasAccessibilityPermission,
                     onRequestMic = { requestMicLauncher.launch(Manifest.permission.RECORD_AUDIO) },
-                    onRequestOverlay = {
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${context.packageName}")
-                        )
-                        context.startActivity(intent)
-                    },
                     onRequestAccessibility = {
                         android.widget.Toast.makeText(
                             context,
@@ -908,10 +896,8 @@ private fun LanguageOptionCard(
 private fun Screen3PrivacyPermissions(
     context: Context,
     hasMic: Boolean,
-    hasOverlay: Boolean,
     hasAccessibility: Boolean,
     onRequestMic: () -> Unit,
-    onRequestOverlay: () -> Unit,
     onRequestAccessibility: () -> Unit,
     onRequestAppInfo: () -> Unit,
     onBack: () -> Unit,
@@ -964,7 +950,7 @@ private fun Screen3PrivacyPermissions(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "FlowKeys needs permissions so the floating bubble can appear above your keyboard and insert dictated text.",
+            text = "FlowKeys needs minimal permissions so the floating mic can appear above your keyboard and insert dictated text.",
             color = StitchTextSecondary,
             fontSize = 12.sp,
             lineHeight = 17.sp
@@ -995,14 +981,42 @@ private fun Screen3PrivacyPermissions(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        PermissionCard(
-            title = "Floating Bubble",
-            subtitle = "Required: Shows sleek mic pill docked over keyboard.",
-            icon = Icons.Default.BubbleChart,
-            isGranted = hasOverlay,
-            actionLabel = "Allow",
-            onAction = onRequestOverlay
-        )
+        // Clean architecture badge: No SYSTEM_ALERT_WINDOW required!
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurface2),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
+        ) {
+            Row(
+                modifier = Modifier.padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BubbleChart,
+                    contentDescription = null,
+                    tint = StitchSuccess,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "FLOATING PILL OVERLAY",
+                        color = StitchTextPrimary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                    Text(
+                        text = "Rendered natively via Accessibility layer. Zero extra overlay permissions needed.",
+                        color = StitchTextSecondary,
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
+        }
 
         if (android.os.Build.VERSION.SDK_INT >= 33 && !hasAccessibility) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -1086,11 +1100,10 @@ private fun Screen3PrivacyPermissions(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        val allGranted = hasMic && hasOverlay && hasAccessibility
+        val allGranted = hasMic && hasAccessibility
 
         val (btnText, btnAction) = when {
             !hasAccessibility -> "Enable Accessibility in Settings" to onRequestAccessibility
-            !hasOverlay -> "Enable Floating Bubble" to onRequestOverlay
             !hasMic -> "Grant Microphone Permission" to onRequestMic
             else -> "Set up FlowKeys" to onNext
         }

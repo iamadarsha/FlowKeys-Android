@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.os.Build
-import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -27,6 +26,11 @@ import kotlinx.coroutines.launch
 
 /**
  * Manages the lifecycle, positioning, and window flags of the floating micro-pill overlay.
+ *
+ * ARCHITECTURE NOTE: The overlay is rendered using TYPE_ACCESSIBILITY_OVERLAY, which is
+ * provided directly by the AccessibilityService context. This eliminates the need for the
+ * SYSTEM_ALERT_WINDOW permission entirely. The AccessibilityService must be running for
+ * the overlay to exist — which is already required for all other FlowKeys features.
  */
 class FloatingPillManager(private val context: Context) : FloatingPillView.Listener {
 
@@ -38,7 +42,10 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
     private val speechRecognitionManager = SpeechRecognitionManager(context)
 
     private val windowParams = WindowManager.LayoutParams().apply {
-        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        // TYPE_ACCESSIBILITY_OVERLAY: available to AccessibilityService context.
+        // No SYSTEM_ALERT_WINDOW permission required. Overlay is managed by the OS
+        // Accessibility layer and is not interactable by other processes.
+        type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         format = PixelFormat.TRANSLUCENT
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
@@ -58,7 +65,9 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
     private var hasCustomPosition = false
 
     fun attach() {
-        if (isAttached || !Settings.canDrawOverlays(context)) return
+        if (isAttached) return
+        // No canDrawOverlays check needed — TYPE_ACCESSIBILITY_OVERLAY is granted
+        // implicitly when the AccessibilityService is running and connected.
 
         updateScreenDimensions()
 

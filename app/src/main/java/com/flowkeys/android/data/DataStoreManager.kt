@@ -71,13 +71,11 @@ class DataStoreManager(private val context: Context) {
         prefs[KEY_CLOUD_ENABLED] ?: false
     }
 
-    val groqApiKey: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_GROQ_API_KEY] ?: ""
-    }
+    private val securePrefs = com.flowkeys.android.data.local.SecurePreferencesManager.getInstance(context)
 
-    val geminiApiKey: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_GEMINI_API_KEY] ?: ""
-    }
+    val groqApiKey: Flow<String> = securePrefs.groqApiKeyFlow
+
+    val geminiApiKey: Flow<String> = securePrefs.geminiApiKeyFlow
 
     val isContactSyncEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_CONTACT_SYNC_ENABLED] ?: false
@@ -116,14 +114,22 @@ class DataStoreManager(private val context: Context) {
     }
 
     suspend fun setGroqApiKey(apiKey: String) {
+        securePrefs.setGroqApiKey(apiKey)
+        // Clean any plaintext key previously stored in DataStore
         context.dataStore.edit { prefs ->
-            prefs[KEY_GROQ_API_KEY] = apiKey
+            if (prefs.contains(KEY_GROQ_API_KEY)) {
+                prefs.remove(KEY_GROQ_API_KEY)
+            }
         }
     }
 
     suspend fun setGeminiApiKey(apiKey: String) {
+        securePrefs.setGeminiApiKey(apiKey)
+        // Clean any plaintext key previously stored in DataStore
         context.dataStore.edit { prefs ->
-            prefs[KEY_GEMINI_API_KEY] = apiKey
+            if (prefs.contains(KEY_GEMINI_API_KEY)) {
+                prefs.remove(KEY_GEMINI_API_KEY)
+            }
         }
     }
 

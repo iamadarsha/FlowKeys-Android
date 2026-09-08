@@ -1,9 +1,19 @@
 package com.flowkeys.android.ui.onboarding
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,38 +25,62 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.BubbleChart
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.flowkeys.android.core.coordinator.FlowKeysCoordinator
 import com.flowkeys.android.core.model.Language
 import com.flowkeys.android.ui.theme.StitchAccentCoral
@@ -57,95 +91,591 @@ import com.flowkeys.android.ui.theme.StitchSuccess
 import com.flowkeys.android.ui.theme.StitchSurface1
 import com.flowkeys.android.ui.theme.StitchSurface2
 import com.flowkeys.android.ui.theme.StitchSurface3
+import com.flowkeys.android.ui.theme.StitchSurfaceRecessed
 import com.flowkeys.android.ui.theme.StitchTextMuted
 import com.flowkeys.android.ui.theme.StitchTextPrimary
 import com.flowkeys.android.ui.theme.StitchTextSecondary
 
+/**
+ * High-fidelity 4-Screen Onboarding Flow faithfully reproduced from the connected Google Stitch project
+ * ("Phase-Based App Screen Design" - projects/2034639286179709771):
+ *
+ * Screen 1: Onboarding_Welcome (Value Promise)
+ * Screen 2: Onboarding_Language (Language & Local Personalization)
+ * Screen 3: Onboarding_PrivacyPermissions (Privacy & Android System Permissions)
+ * Screen 4: Onboarding_FirstSuccess (First Success / Magic Moment Simulator)
+ */
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
     val context = LocalContext.current
-    val selectedLang by FlowKeysCoordinator.selectedLanguage.collectAsState()
-    var disclosureAccepted by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    Column(
+    var currentStep by remember { mutableIntStateOf(1) } // 1, 2, 3, 4
+    val selectedLang by FlowKeysCoordinator.selectedLanguage.collectAsState()
+
+    // Dynamic permission states refreshed on lifecycle resume
+    var hasMicPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var hasOverlayPermission by remember {
+        mutableStateOf(Settings.canDrawOverlays(context))
+    }
+    var hasAccessibilityPermission by remember {
+        mutableStateOf(isAccessibilityEnabled(context))
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasMicPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                hasOverlayPermission = Settings.canDrawOverlays(context)
+                hasAccessibilityPermission = isAccessibilityEnabled(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val requestMicLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasMicPermission = granted
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(StitchCanvas)
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        AnimatedContent(
+            targetState = currentStep,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
+                } else {
+                    (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
+                }
+            },
+            label = "OnboardingStepTransition"
+        ) { step ->
+            when (step) {
+                1 -> Screen1Welcome(
+                    onNext = { currentStep = 2 }
+                )
+                2 -> Screen2Language(
+                    selectedLanguage = selectedLang,
+                    onSelectLanguage = { FlowKeysCoordinator.setLanguage(it) },
+                    onBack = { currentStep = 1 },
+                    onNext = { currentStep = 3 }
+                )
+                3 -> Screen3PrivacyPermissions(
+                    context = context,
+                    hasMic = hasMicPermission,
+                    hasOverlay = hasOverlayPermission,
+                    hasAccessibility = hasAccessibilityPermission,
+                    onRequestMic = { requestMicLauncher.launch(Manifest.permission.RECORD_AUDIO) },
+                    onRequestOverlay = {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${context.packageName}")
+                        )
+                        context.startActivity(intent)
+                    },
+                    onRequestAccessibility = {
+                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        context.startActivity(intent)
+                    },
+                    onBack = { currentStep = 2 },
+                    onNext = { currentStep = 4 }
+                )
+                4 -> Screen4FirstSuccess(
+                    onBack = { currentStep = 3 },
+                    onComplete = onFinished
+                )
+            }
+        }
+    }
+}
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 1: Onboarding_Welcome (The Value Promise)
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun Screen1Welcome(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchAccentCoral),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.GraphicEq,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Text(
+                    text = "FlowKeys",
+                    color = StitchTextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = (-0.2).sp
+                )
+            }
+
+            // Step Badge
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(StitchSurface2)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "01 / 04",
+                    color = StitchAccentCoral,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Editorial Headline
         Text(
-            text = "FlowKeys",
-            color = StitchAccentCoral,
+            text = "Speak naturally.\nFlowKeys writes it.",
+            color = StitchTextPrimary,
             fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
+            lineHeight = 38.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.5).sp
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         Text(
-            text = "Speak naturally. FlowKeys types it for you inside any app without replacing your keyboard.",
+            text = "Turn your voice into clean, ready-to-send text in any app — without replacing your existing keyboard.",
             color = StitchTextSecondary,
-            fontSize = 14.sp,
+            fontSize = 15.sp,
             lineHeight = 22.sp
         )
 
-        // Step 1: Language Selection
-        Text(
-            text = "1. Choose Your Primary Language",
-            color = StitchTextPrimary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
+        Spacer(modifier = Modifier.height(14.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Language Support Micro-Pill
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(StitchSurface1)
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(20.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
-            Language.entries.forEach { lang ->
-                val isSelected = lang == selectedLang
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Bolt,
+                    contentDescription = null,
+                    tint = StitchSuccess,
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "English  •  हिंदी  •  বাংলা",
+                    color = StitchTextPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "On-Device AI",
+                    color = StitchTextMuted,
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Hero Demonstration Phone Card Mockup
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurfaceRecessed),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(16.dp))
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                // Chat header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(StitchSurface1)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(StitchAccentCoral.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("A", color = StitchAccentCoral, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text("Aarav Sharma", color = StitchTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Text("online", color = StitchSuccess, fontSize = 10.sp)
+                        }
+                    }
+                    Text("WhatsApp", color = StitchTextMuted, fontSize = 10.sp)
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Chat bubble incoming
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth(0.85f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) StitchSurface3 else StitchSurface1)
-                        .border(
-                            width = 1.5.dp,
-                            color = if (isSelected) StitchAccentCoral else StitchBorderSubtle,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable { FlowKeysCoordinator.setLanguage(lang) }
-                        .padding(vertical = 12.dp),
+                        .background(StitchSurface2)
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "Can you send the project summary before the 4 PM team sync?",
+                        color = StitchTextSecondary,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Chat bubble outgoing
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .fillMaxWidth(0.85f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(StitchAccentCoral.copy(alpha = 0.15f))
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "Drafting it right now via voice, give me two minutes!",
+                        color = StitchAccentPeach,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // FLOATING FLOWKEYS PILL ABOVE KEYBOARD MOCKUP
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(StitchSurface3)
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(StitchAccentCoral),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Waveform bars
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val heights = listOf(8, 16, 20, 12, 18, 14, 10)
+                                heights.forEach { h ->
+                                    Box(
+                                        modifier = Modifier
+                                            .width(3.dp)
+                                            .height(h.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(StitchAccentCoral)
+                                    )
+                                }
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(StitchSurface1)
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "LISTENING…",
+                                color = StitchSuccess,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Simulated keyboard bar
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchSurface1)
+                        .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = lang.nativeName,
-                            color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = lang.code.uppercase(),
-                            color = if (isSelected) StitchAccentPeach else StitchTextMuted,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = "⌨  Gboard / System Keyboard Stays Active",
+                        color = StitchTextMuted,
+                        fontSize = 11.sp
+                    )
                 }
             }
         }
 
-        // Step 2: Google Play Prominent Disclosure
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Equation Badge
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(StitchSurface1)
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
+                .padding(vertical = 10.dp, horizontal = 14.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.Keyboard, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("Your Keyboard", color = StitchTextSecondary, fontSize = 11.sp)
+            }
+            Text("+", color = StitchTextMuted, fontSize = 14.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.Mic, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("FlowKeys AI", color = StitchAccentCoral, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+            Text("=", color = StitchTextMuted, fontSize = 14.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("Clean Text", color = StitchSuccess, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Primary CTA Button
+        Button(
+            onClick = onNext,
+            colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Get started",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.Lock, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "100% private. Speech processed locally on device.",
+                color = StitchTextMuted,
+                fontSize = 11.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 2: Onboarding_Language (Language & Local Personalization)
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun Screen2Language(
+    selectedLanguage: Language,
+    onSelectLanguage: (Language) -> Unit,
+    onBack: () -> Unit,
+    onNext: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Header with Back and Indicator
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary)
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(StitchSurface2)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "02 / 04",
+                    color = StitchAccentCoral,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.GraphicEq, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "ACOUSTIC TUNING",
+                color = StitchSuccess,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
-            text = "2. Privacy & Accessibility Disclosure",
+            text = "Make FlowKeys\nsound like you.",
             color = StitchTextPrimary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
+            fontSize = 30.sp,
+            lineHeight = 36.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.5).sp
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "Choose what you want FlowKeys to write. It can learn the words, names and phrases you use most — privately on your phone.",
+            color = StitchTextSecondary,
+            fontSize = 14.sp,
+            lineHeight = 21.sp
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Language Cards
+        LanguageOptionCard(
+            title = "English",
+            scriptBadge = "Global",
+            samplePhrase = "“I'll send it tomorrow.”",
+            symbol = "Aa",
+            isSelected = selectedLanguage == Language.ENGLISH,
+            onSelect = { onSelectLanguage(Language.ENGLISH) }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LanguageOptionCard(
+            title = "हिंदी",
+            subtitle = "(Hindi)",
+            scriptBadge = "On-Device",
+            samplePhrase = "“मैं इसे कल भेज दूँगा।”",
+            symbol = "अ",
+            isSelected = selectedLanguage == Language.HINDI,
+            onSelect = { onSelectLanguage(Language.HINDI) }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LanguageOptionCard(
+            title = "বাংলা",
+            subtitle = "(Bengali)",
+            scriptBadge = "On-Device",
+            samplePhrase = "“আমি এটা কাল পাঠিয়ে দেব।”",
+            symbol = "অ",
+            isSelected = selectedLanguage == Language.BENGALI,
+            onSelect = { onSelectLanguage(Language.BENGALI) }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Privacy & Local Learning Architecture Node
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurface1),
             shape = RoundedCornerShape(14.dp),
@@ -155,174 +685,855 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = null,
-                        tint = StitchSuccess,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Zero Data Collection Guarantee",
-                        color = StitchTextPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(StitchSuccess.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Shield, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(18.dp))
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Learns locally",
+                                color = StitchTextPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(StitchSuccess)
+                            )
+                        }
+                        Text(
+                            text = "FlowKeys remembers frequently used words and your corrections without needing your contacts.",
+                            color = StitchTextSecondary,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "FlowKeys uses the Android AccessibilityService API exclusively to detect when you tap a text field and to type your dictated text directly into it.\n\n• FlowKeys NEVER reads passwords, PINs, or OTPs\n• FlowKeys NEVER monitors personal typing or chats\n• 100% on-device processing; zero audio leaves your phone",
-                    color = StitchTextSecondary,
-                    fontSize = 13.sp,
-                    lineHeight = 19.sp
-                )
-                Spacer(modifier = Modifier.height(14.dp))
-                Button(
-                    onClick = { disclosureAccepted = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (disclosureAccepted) StitchSuccess else StitchAccentCoral
-                    ),
-                    shape = RoundedCornerShape(10.dp),
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchSurface2)
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = if (disclosureAccepted) "✓ Disclosure Accepted" else "I Understand & Agree",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Memory, contentDescription = null, tint = StitchTextMuted, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Private Neural Core", color = StitchTextMuted, fontSize = 11.sp)
+                    }
+                    Text("0 kB sent to cloud", color = StitchSuccess, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
-        }
-
-        // Step 3: Required Permissions Checklist
-        Text(
-            text = "3. Enable Core Permissions",
-            color = StitchTextPrimary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        PermissionRow(
-            title = "Display Over Other Apps",
-            subtitle = "Shows the floating FlowKeys micro-pill",
-            icon = Icons.Default.Layers,
-            isGranted = Settings.canDrawOverlays(context),
-            onAction = {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:${context.packageName}")
-                )
-                context.startActivity(intent)
-            }
-        )
-
-        PermissionRow(
-            title = "Accessibility Service",
-            subtitle = "Detects focused text box & inserts words",
-            icon = Icons.Default.Security,
-            isGranted = isAccessibilityEnabled(context),
-            onAction = {
-                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                context.startActivity(intent)
-            }
-        )
-
-        PermissionRow(
-            title = "Microphone Access",
-            subtitle = "Records voice for private on-device dictation",
-            icon = Icons.Default.Mic,
-            isGranted = androidx.core.content.ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.RECORD_AUDIO
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED,
-            onAction = {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                }
-                context.startActivity(intent)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onFinished,
-            colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-        ) {
-            Text(
-                text = "Continue to FlowKeys Ready",
-                color = Color.White,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onNext,
+            colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Continue",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "YOU CAN SWITCH SCRIPTS & LANGUAGES ANYTIME",
+            color = StitchTextMuted,
+            fontSize = 10.sp,
+            letterSpacing = 0.5.sp,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
 @Composable
-private fun PermissionRow(
+private fun LanguageOptionCard(
     title: String,
-    subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isGranted: Boolean,
-    onAction: () -> Unit
+    subtitle: String? = null,
+    scriptBadge: String,
+    samplePhrase: String,
+    symbol: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) StitchSurface2 else StitchSurface1
+        ),
+        shape = RoundedCornerShape(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
+            .border(
+                width = if (isSelected) 1.5.dp else 1.dp,
+                color = if (isSelected) StitchAccentCoral else StitchBorderSubtle,
+                shape = RoundedCornerShape(14.dp)
+            )
+            .clickable { onSelect() }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 56.dp)
                 .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.18f) else StitchSurface3),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = symbol,
+                        color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = title,
+                            color = StitchTextPrimary,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (subtitle != null) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = subtitle,
+                                color = StitchTextMuted,
+                                fontSize = 13.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.2f) else StitchSurface3)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = scriptBadge.uppercase(),
+                                color = if (isSelected) StitchAccentCoral else StitchTextMuted,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = samplePhrase,
+                        color = StitchTextSecondary,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(StitchSurface2)
-                    .border(1.dp, StitchBorderSubtle, RoundedCornerShape(8.dp)),
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) StitchAccentCoral else StitchSurface3)
+                    .border(1.dp, if (isSelected) StitchAccentCoral else StitchBorderSubtle, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(18.dp))
+                if (isSelected) {
+                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                }
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, color = StitchTextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text(text = subtitle, color = StitchTextMuted, fontSize = 12.sp)
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 3: Onboarding_PrivacyPermissions (Privacy & Android Permissions)
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun Screen3PrivacyPermissions(
+    context: Context,
+    hasMic: Boolean,
+    hasOverlay: Boolean,
+    hasAccessibility: Boolean,
+    onRequestMic: () -> Unit,
+    onRequestOverlay: () -> Unit,
+    onRequestAccessibility: () -> Unit,
+    onBack: () -> Unit,
+    onNext: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary)
             }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(StitchSurface2)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "03 / 04",
+                    color = StitchAccentCoral,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Private by default.\nReady anywhere.",
+            color = StitchTextPrimary,
+            fontSize = 30.sp,
+            lineHeight = 36.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.5).sp
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "FlowKeys needs a few Android permissions so the bubble can appear above your keyboard and place your words where you type.",
+            color = StitchTextSecondary,
+            fontSize = 14.sp,
+            lineHeight = 21.sp
+        )
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        // Permission Stack
+        PermissionCard(
+            title = "Microphone",
+            subtitle = "To hear what you say for speech dictation.",
+            icon = Icons.Default.Mic,
+            isGranted = hasMic,
+            actionLabel = "Grant",
+            onAction = onRequestMic
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        PermissionCard(
+            title = "Accessibility",
+            subtitle = "Detects active text field & types directly into it.",
+            icon = Icons.Default.TextFields,
+            isGranted = hasAccessibility,
+            actionLabel = "Enable",
+            onAction = onRequestAccessibility
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        PermissionCard(
+            title = "Floating Bubble",
+            subtitle = "Shows FlowKeys micro-pill docked right above keyboard.",
+            icon = Icons.Default.BubbleChart,
+            isGranted = hasOverlay,
+            actionLabel = "Allow",
+            onAction = onRequestOverlay
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Architecture & Data Card
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.VerifiedUser,
+                    contentDescription = null,
+                    tint = StitchSuccess,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        text = "ARCHITECTURE & DATA PRIVACY",
+                        color = StitchTextPrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "• FlowKeys NEVER reads passwords, PINs, or OTPs\n• FlowKeys NEVER monitors typing outside dictation\n• On-device processing ensures zero speech data leaves your phone without your explicit cloud key.",
+                        color = StitchTextSecondary,
+                        fontSize = 12.sp,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val allGranted = hasMic && hasOverlay && hasAccessibility
+
+        Button(
+            onClick = onNext,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (allGranted) StitchAccentCoral else StitchSurface3
+            ),
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = if (allGranted) "Set up FlowKeys" else "Continue with Setup",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "CONFIGURABLE ANYTIME IN APP SETTINGS",
+            color = StitchTextMuted,
+            fontSize = 10.sp,
+            letterSpacing = 0.5.sp,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun PermissionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    isGranted: Boolean,
+    actionLabel: String,
+    onAction: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = if (isGranted) StitchSuccess.copy(alpha = 0.4f) else StitchBorderSubtle,
+                shape = RoundedCornerShape(14.dp)
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isGranted) StitchSuccess.copy(alpha = 0.15f) else StitchSurface2),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (isGranted) StitchSuccess else StitchAccentCoral,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = title,
+                            color = StitchTextPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(if (isGranted) StitchSuccess.copy(alpha = 0.2f) else StitchSurface3)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = if (isGranted) "ACTIVE" else "REQUIRED",
+                                color = if (isGranted) StitchSuccess else StitchTextMuted,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = subtitle,
+                        color = StitchTextSecondary,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             if (isGranted) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
+                    contentDescription = "Active",
                     tint = StitchSuccess,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             } else {
                 Button(
                     onClick = onAction,
                     colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(20.dp),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "Enable", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(
+                        text = actionLabel,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 4: Onboarding_FirstSuccess (First Success / Magic Moment Simulator)
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+private fun Screen4FirstSuccess(
+    onBack: () -> Unit,
+    onComplete: () -> Unit
+) {
+    var demoLang by remember { mutableStateOf("bn") } // "bn", "hi", "en"
+
+    val sampleText = when (demoLang) {
+        "bn" -> "কাল আমাকে অফিসে একটু আগে যেতে হবে।"
+        "hi" -> "कल मुझे ऑफिस से थोड़ा जल्दी निकलना होगा।"
+        else -> "I need to leave the office a little early tomorrow."
+    }
+
+    val sampleMeta = when (demoLang) {
+        "bn" -> "৪০ অক্ষর • ১০০% নিশ্চিত • BN"
+        "hi" -> "४२ अक्षर • ১০০% सटीक • HI"
+        else -> "52 chars • 100% accurate • EN"
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = StitchTextPrimary)
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(StitchSurface2)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "04 / 04",
+                    color = StitchAccentCoral,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = StitchAccentCoral, modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "EXPERIENCE MAGIC",
+                color = StitchAccentCoral,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Now, let's try it.",
+            color = StitchTextPrimary,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.5).sp
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Open any text field, tap the FlowKeys bubble, and speak normally.",
+            color = StitchTextSecondary,
+            fontSize = 14.sp,
+            lineHeight = 21.sp
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Live Multilingual Simulation Card
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurfaceRecessed),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(16.dp))
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("TARGET LANGUAGE", color = StitchTextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Bolt, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Zero Cloud Delay", color = StitchSuccess, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Selector tabs
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchSurface1)
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    listOf(
+                        Triple("bn", "বাংলা", "Bengali"),
+                        Triple("hi", "हिंदी", "Hindi"),
+                        Triple("en", "English", "Global")
+                    ).forEach { (code, title, sub) ->
+                        val isSelected = demoLang == code
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (isSelected) StitchAccentCoral else Color.Transparent)
+                                .clickable { demoLang = code }
+                                .padding(vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = title,
+                                    color = if (isSelected) Color.White else StitchTextPrimary,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = sub,
+                                    color = if (isSelected) Color.White.copy(alpha = 0.8f) else StitchTextMuted,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Real Input Box Area
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(StitchSurface1)
+                        .border(1.dp, StitchBorderSubtle, RoundedCornerShape(10.dp))
+                        .padding(12.dp)
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = sampleText,
+                                color = StitchTextPrimary,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(16.dp)
+                                    .background(StitchAccentCoral)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = sampleMeta,
+                            color = StitchTextMuted,
+                            fontSize = 10.sp,
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Floating FlowKeys Dynamic Micro-Interaction Pill
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(StitchSurface3)
+                        .border(1.dp, StitchAccentCoral.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(StitchAccentCoral),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val heights = listOf(10, 18, 24, 14, 20, 16, 8)
+                                heights.forEach { h ->
+                                    Box(
+                                        modifier = Modifier
+                                            .width(3.dp)
+                                            .height(h.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(StitchAccentCoral)
+                                    )
+                                }
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(StitchSurface1)
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "${demoLang.uppercase()} • STREAMING",
+                                color = StitchSuccess,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Realistic keyboard mockup bar
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(StitchSurface1)
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Q  W  E  R  T  Y  U  I  O  P",
+                        color = StitchTextMuted,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 2.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Engine ready card
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchSurface1)
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(13.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Whisper-Engine Ready", color = StitchTextSecondary, fontSize = 11.sp)
+                    }
+                    Text("Model: 42 MB • On-Device", color = StitchTextMuted, fontSize = 10.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Bottom CTA Button
+        Button(
+            onClick = onComplete,
+            colors = ButtonDefaults.buttonColors(containerColor = StitchAccentCoral),
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Start using FlowKeys",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "You can change everything later in Settings.",
+            color = StitchTextMuted,
+            fontSize = 11.sp,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 

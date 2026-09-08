@@ -85,8 +85,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Psychology
+
 @Composable
-fun SettingsScreen(onNavigateToDiagnostics: () -> Unit = {}) {
+fun SettingsScreen(
+    onNavigateToDiagnostics: () -> Unit = {},
+    onNavigateToStats: () -> Unit = {},
+    onNavigateToLearnedVocab: () -> Unit = {}
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStoreManager = remember { DataStoreManager(context) }
@@ -297,6 +304,22 @@ fun SettingsScreen(onNavigateToDiagnostics: () -> Unit = {}) {
                                 }
                             }
                         }
+                    )
+                    SettingsDivider()
+                    SettingsRowClickable(
+                        icon = Icons.Default.Analytics,
+                        title = "Your Usage Stats",
+                        subtitle = "Words spoken, streaks & time saved estimate",
+                        trailingTag = "LOCAL",
+                        onClick = onNavigateToStats
+                    )
+                    SettingsDivider()
+                    SettingsRowClickable(
+                        icon = Icons.Default.Psychology,
+                        title = "Learned Vocabulary",
+                        subtitle = "On-device terms & speech corrections",
+                        trailingTag = "PRIVACY CORE",
+                        onClick = onNavigateToLearnedVocab
                     )
                     SettingsDivider()
                     SettingsRowClickable(

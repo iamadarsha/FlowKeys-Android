@@ -3,6 +3,7 @@ package com.flowkeys.android.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.flowkeys.android.core.model.Language
@@ -28,6 +29,8 @@ class DataStoreManager(private val context: Context) {
         private val KEY_TARGET_TRANSLATION = stringPreferencesKey("target_translation_language")
         private val KEY_CONTACT_SYNC_ENABLED = booleanPreferencesKey("contact_sync_enabled")
         private val KEY_PROCESSING_MODE = stringPreferencesKey("processing_quality_mode")
+        private val KEY_LEARNED_VOCAB_ENABLED = booleanPreferencesKey("learned_vocab_enabled")
+        private val KEY_HEDGE_DELAY_MS = intPreferencesKey("hedge_delay_ms")
     }
 
     enum class ProcessingQualityMode(val id: String, val displayName: String) {
@@ -75,6 +78,14 @@ class DataStoreManager(private val context: Context) {
 
     val isContactSyncEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_CONTACT_SYNC_ENABLED] ?: false
+    }
+
+    val isLearnedVocabEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LEARNED_VOCAB_ENABLED] ?: true
+    }
+
+    val hedgeDelayMs: Flow<Int> = context.dataStore.data.map { prefs ->
+        prefs[KEY_HEDGE_DELAY_MS] ?: 800
     }
 
     suspend fun setLanguage(language: Language) {
@@ -132,6 +143,18 @@ class DataStoreManager(private val context: Context) {
     suspend fun setContactSyncEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_CONTACT_SYNC_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLearnedVocabEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LEARNED_VOCAB_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setHedgeDelayMs(delayMs: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_HEDGE_DELAY_MS] = delayMs
         }
     }
 }

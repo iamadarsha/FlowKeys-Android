@@ -53,7 +53,7 @@
         <!-- Onboarding & Prominent Disclosure Activity -->
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
-            android:exported="false" />
+            android:exported="true" />
 
         <!-- Core Accessibility Service for Focus Detection & Text Insertion -->
         <service

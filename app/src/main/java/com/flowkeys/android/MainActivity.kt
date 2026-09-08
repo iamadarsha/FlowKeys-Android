@@ -94,13 +94,27 @@ class MainActivity : ComponentActivity() {
             FlowKeysTheme {
                 var selectedTab by remember { mutableIntStateOf(0) }
                 var showDiagnostics by remember { mutableStateOf(false) }
+                var showStats by remember { mutableStateOf(false) }
+                var showLearnedVocab by remember { mutableStateOf(false) }
+
+                val isSubScreen = showDiagnostics || showStats || showLearnedVocab
+                val subScreenTitle = when {
+                    showDiagnostics -> "System Diagnostics"
+                    showStats -> "Your Usage Stats"
+                    showLearnedVocab -> "Learned Vocabulary"
+                    else -> "FlowKeys"
+                }
 
                 Scaffold(
                     topBar = {
                         TopAppBar(
                             navigationIcon = {
-                                if (showDiagnostics) {
-                                    IconButton(onClick = { showDiagnostics = false }) {
+                                if (isSubScreen) {
+                                    IconButton(onClick = {
+                                        showDiagnostics = false
+                                        showStats = false
+                                        showLearnedVocab = false
+                                    }) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                             contentDescription = "Back to Settings",
@@ -112,16 +126,16 @@ class MainActivity : ComponentActivity() {
                             title = {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(start = if (showDiagnostics) 0.dp else 4.dp)
+                                    modifier = Modifier.padding(start = if (isSubScreen) 0.dp else 4.dp)
                                 ) {
                                     Text(
-                                        text = if (showDiagnostics) "System Diagnostics" else "FlowKeys",
+                                        text = subScreenTitle,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp,
                                         color = StitchTextPrimary,
                                         letterSpacing = (-0.3).sp
                                     )
-                                    if (!showDiagnostics) {
+                                    if (!isSubScreen) {
                                         Spacer(modifier = Modifier.width(10.dp))
                                         Box(
                                             modifier = Modifier
@@ -156,7 +170,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             actions = {
-                                if (!showDiagnostics) {
+                                if (!isSubScreen) {
                                     IconButton(
                                         onClick = {
                                             startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
@@ -176,7 +190,7 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     bottomBar = {
-                        if (!showDiagnostics) {
+                        if (!isSubScreen) {
                             NavigationBar(
                                 containerColor = StitchSurfaceRecessed,
                                 modifier = Modifier.drawBehind {
@@ -265,15 +279,22 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        if (showDiagnostics) {
-                            DiagnosticsScreen()
-                        } else {
-                            when (selectedTab) {
-                                0 -> PlaygroundScreen()
-                                1 -> HistoryScreen()
-                                2 -> OfflineModelsScreen()
-                                3 -> SettingsScreen(onNavigateToDiagnostics = { showDiagnostics = true })
-                                else -> PlaygroundScreen()
+                        when {
+                            showDiagnostics -> DiagnosticsScreen()
+                            showStats -> com.flowkeys.android.ui.stats.StatsScreen()
+                            showLearnedVocab -> com.flowkeys.android.ui.dictionary.LearnedVocabularyScreen()
+                            else -> {
+                                when (selectedTab) {
+                                    0 -> PlaygroundScreen()
+                                    1 -> HistoryScreen()
+                                    2 -> OfflineModelsScreen()
+                                    3 -> SettingsScreen(
+                                        onNavigateToDiagnostics = { showDiagnostics = true },
+                                        onNavigateToStats = { showStats = true },
+                                        onNavigateToLearnedVocab = { showLearnedVocab = true }
+                                    )
+                                    else -> PlaygroundScreen()
+                                }
                             }
                         }
                     }

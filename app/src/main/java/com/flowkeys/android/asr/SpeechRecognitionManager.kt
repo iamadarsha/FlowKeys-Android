@@ -260,27 +260,47 @@ class SpeechRecognitionManager(private val context: Context) {
 
                             android.util.Log.d("SpeechRecognitionManager", "Raw Android ASR: '$rawText', activeLang: $activeLanguage, isCloud: $isCloud, scriptMode: $currentScriptMode, targetLang: $targetLang, qualityMode: $qualityMode")
 
-                            // Cloud Multimodal ASR: Prefer Gemini 2.0 Flash in Best Quality, then Groq Whisper
+                            // Fast Cloud Multimodal ASR: Hedged Race between Gemini 3.5 Flash Lite and Groq Whisper
                             if (isCloud && audioBuffer.isNotEmpty()) {
                                 val floatArray = audioBuffer.toFloatArray()
                                 val wavBytes = AudioEncoder.encodeToWav(floatArray)
+                                val hedgeDelay = dataStore.hedgeDelayMs.first().toLong()
+                                val vocabHints = com.flowkeys.android.dictionary.LearnedVocabularyStore.getTopHints(activeLanguage, limit = 12)
 
-                                if (!currentGeminiKey.isNullOrBlank() && qualityMode == com.flowkeys.android.data.DataStoreManager.ProcessingQualityMode.BEST_QUALITY) {
-                                    FlowKeysCoordinator.setProcessing("Gemini transcribing…")
-                                    val geminiResult = com.flowkeys.android.providers.GeminiCloudProvider.transcribe(wavBytes, activeLanguage, currentGeminiKey)
-                                    android.util.Log.d("SpeechRecognitionManager", "Gemini ASR Result: '$geminiResult'")
-                                    if (!geminiResult.isNullOrBlank()) {
-                                        finalTextToProcess = geminiResult
+                                val primaryCall: (suspend () -> String?)? = if (!currentGeminiKey.isNullOrBlank() && qualityMode == com.flowkeys.android.data.DataStoreManager.ProcessingQualityMode.BEST_QUALITY) {
+                                    {
+                                        com.flowkeys.android.providers.GeminiCloudProvider.transcribe(
+                                            wavBytes,
+                                            activeLanguage,
+                                            currentGeminiKey,
+                                            vocabHints
+                                        )
                                     }
-                                }
+                                } else null
 
-                                if (finalTextToProcess == rawText && !currentKey.isNullOrBlank()) {
-                                    FlowKeysCoordinator.setProcessing("Groq transcribing…")
-                                    val groqProvider = GroqSpeechProvider(currentKey)
-                                    val groqResult = groqProvider.transcribe(wavBytes, activeLanguage)
-                                    android.util.Log.d("SpeechRecognitionManager", "Groq ASR Result: '$groqResult'")
-                                    if (!groqResult.isNullOrBlank()) {
-                                        finalTextToProcess = groqResult
+                                val secondaryCall: (suspend () -> String?)? = if (!currentKey.isNullOrBlank()) {
+                                    {
+                                        GroqSpeechProvider(currentKey).transcribe(wavBytes, activeLanguage)
+                                    }
+                                } else null
+
+                                if (primaryCall != null || secondaryCall != null) {
+                                    val cloudWinner = if (primaryCall != null) {
+                                        com.flowkeys.android.providers.FastFailoverOrchestrator.race(
+                                            hedgeDelayMs = hedgeDelay,
+                                            primaryName = "Gemini",
+                                            secondaryName = "Groq",
+                                            primaryCall = primaryCall,
+                                            secondaryCall = secondaryCall,
+                                            validator = { it.isNotBlank() }
+                                        )
+                                    } else {
+                                        secondaryCall?.invoke()
+                                    }
+
+                                    android.util.Log.d("SpeechRecognitionManager", "Cloud ASR Winner: '$cloudWinner'")
+                                    if (!cloudWinner.isNullOrBlank()) {
+                                        finalTextToProcess = cloudWinner
                                     }
                                 }
                             }

@@ -1015,41 +1015,51 @@ object TranslationEngine {
             return@withContext directMatch
         }
 
-        // 3. Gold-Standard Tier: Gemini 2.0 Flash Language Intelligence
-        if (!geminiKey.isNullOrBlank()) {
-            val geminiResult = com.flowkeys.android.providers.GeminiCloudProvider.translateOrPolish(
-                sourceText,
-                sourceLang,
-                targetLang,
-                geminiKey,
-                smartMode
-            )
-            if (!geminiResult.isNullOrBlank()) {
-                val validation = com.flowkeys.android.polish.validation.OutputValidator.validate(
-                    geminiResult,
-                    sourceText,
-                    targetLang,
-                    isTranslation = true
-                )
-                if (validation.isValid) {
-                    return@withContext geminiResult
+        // 3. Fast Hedged Cloud Tier: Gemini 3.5 Flash Lite (Primary) -> Groq Llama-3.3-70b (Fast Hedge / Failover)
+        if (!geminiKey.isNullOrBlank() || !apiKey.isNullOrBlank()) {
+            val vocabHints = com.flowkeys.android.dictionary.LearnedVocabularyStore.getTopHints(targetLang, limit = 10)
+            val primaryCall: (suspend () -> String?)? = if (!geminiKey.isNullOrBlank()) {
+                {
+                    com.flowkeys.android.providers.GeminiCloudProvider.translateOrPolish(
+                        sourceText,
+                        sourceLang,
+                        targetLang,
+                        geminiKey,
+                        smartMode,
+                        vocabHints
+                    )
                 }
-            }
-        }
+            } else null
 
-        // 4. High-Performance Cloud Tier: Groq Llama-3.3-70b Versatile
-        if (!apiKey.isNullOrBlank()) {
-            val cloudResult = GroqTranslationProvider.translate(sourceText, sourceLang, targetLang, apiKey)
-            if (!cloudResult.isNullOrBlank()) {
-                val validation = com.flowkeys.android.polish.validation.OutputValidator.validate(
-                    cloudResult,
-                    sourceText,
-                    targetLang,
-                    isTranslation = true
-                )
-                if (validation.isValid) {
-                    return@withContext cloudResult
+            val secondaryCall: (suspend () -> String?)? = if (!apiKey.isNullOrBlank()) {
+                {
+                    GroqTranslationProvider.translate(sourceText, sourceLang, targetLang, apiKey)
                 }
+            } else null
+
+            val winner = if (primaryCall != null) {
+                com.flowkeys.android.providers.FastFailoverOrchestrator.race(
+                    hedgeDelayMs = 800L,
+                    primaryName = "Gemini Translate",
+                    secondaryName = "Groq Translate",
+                    primaryCall = primaryCall,
+                    secondaryCall = secondaryCall,
+                    validator = { cand ->
+                        com.flowkeys.android.polish.validation.OutputValidator.validate(
+                            cand,
+                            sourceText,
+                            targetLang,
+                            isTranslation = true
+                        ).isValid
+                    }
+                )
+            } else {
+                val res = secondaryCall?.invoke()
+                if (res != null && com.flowkeys.android.polish.validation.OutputValidator.validate(res, sourceText, targetLang, isTranslation = true).isValid) res else null
+            }
+
+            if (!winner.isNullOrBlank()) {
+                return@withContext winner
             }
         }
 

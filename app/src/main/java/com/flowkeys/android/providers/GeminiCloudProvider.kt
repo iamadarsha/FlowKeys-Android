@@ -42,12 +42,13 @@ object GeminiCloudProvider {
     suspend fun transcribe(
         audioWav: ByteArray,
         language: Language,
-        apiKey: String
+        apiKey: String,
+        vocabularyHints: List<String> = emptyList()
     ): String? = withContext(Dispatchers.IO) {
         if (audioWav.isEmpty() || apiKey.isBlank()) return@withContext null
 
         val base64Audio = Base64.encodeToString(audioWav, Base64.NO_WRAP)
-        val prompt = buildTranscriptionPrompt(language)
+        val prompt = buildTranscriptionPrompt(language, vocabularyHints)
 
         for (model in CANDIDATE_MODELS) {
             val result = tryTranscribeWithModel(model, base64Audio, prompt, apiKey)
@@ -59,15 +60,19 @@ object GeminiCloudProvider {
         return@withContext null
     }
 
-    private fun buildTranscriptionPrompt(language: Language): String {
+    private fun buildTranscriptionPrompt(language: Language, vocabularyHints: List<String> = emptyList()): String {
         val langName = when (language) {
             Language.BENGALI -> "West Bengal Bengali (বাংলা)"
             Language.HINDI -> "Hindi (हिंदी)"
             Language.ENGLISH -> "Indian English"
         }
+        val hintsSection = if (vocabularyHints.isNotEmpty()) {
+            "\nVocabulary Hints (user's preferred spellings and local proper nouns): ${vocabularyHints.joinToString(", ")}"
+        } else ""
+
         return "You are an elite speech-to-text transcriber for FlowKeys. Listen to this audio and transcribe exactly what was spoken in $langName. " +
-                "The speaker may naturally use code-mixed terms, English loanwords, technical vocabulary, Indian names, or places. " +
-                "CRITICAL: Output ONLY the verbatim spoken transcript in the appropriate native script (or Latin for English). Never include preamble, explanations, notes, or quotes."
+                "The speaker may naturally use code-mixed terms, English loanwords, technical vocabulary, Indian names, or places. $hintsSection" +
+                "\nCRITICAL: Output ONLY the verbatim spoken transcript in the appropriate native script (or Latin for English). Never include preamble, explanations, notes, or quotes."
     }
 
     private fun tryTranscribeWithModel(
@@ -136,11 +141,12 @@ object GeminiCloudProvider {
         sourceLang: Language,
         targetLang: Language,
         apiKey: String,
-        smartMode: SmartMode = SmartMode.GENERAL
+        smartMode: SmartMode = SmartMode.GENERAL,
+        vocabularyHints: List<String> = emptyList()
     ): String? = withContext(Dispatchers.IO) {
         if (text.isBlank() || apiKey.isBlank()) return@withContext text
 
-        val prompt = buildLanguagePrompt(text, sourceLang, targetLang, smartMode)
+        val prompt = buildLanguagePrompt(text, sourceLang, targetLang, smartMode, vocabularyHints)
         for (model in CANDIDATE_MODELS) {
             val result = tryGenerateText(model, prompt, apiKey)
             if (!result.isNullOrBlank()) {
@@ -155,7 +161,8 @@ object GeminiCloudProvider {
         text: String,
         sourceLang: Language,
         targetLang: Language,
-        smartMode: SmartMode
+        smartMode: SmartMode,
+        vocabularyHints: List<String> = emptyList()
     ): String {
         val isTranslation = sourceLang != targetLang
         val styleInstruction = when (smartMode) {
@@ -171,6 +178,10 @@ object GeminiCloudProvider {
             "Polish the following dictated ${sourceLang.displayName} text into natural written text."
         }
 
+        val hintsRule = if (vocabularyHints.isNotEmpty()) {
+            "\n8. Personal Vocabulary Hints: When resolving ambiguous terms, prefer these user vocabulary spellings: ${vocabularyHints.joinToString(", ")}"
+        } else ""
+
         return """
 You are the frontier language engine for FlowKeys.
 $taskDesc
@@ -183,7 +194,7 @@ MANDATORY RULES:
 4. Protect Spans: Retain numbers, dates, times, currencies (₹, $), URLs, emails, and code symbols verbatim.
 5. Resolve Self-Corrections: If the speaker self-corrects (e.g., "Friday... actually Saturday" -> "Saturday"), output only the corrected intent.
 6. Output Target Script: For Bengali use Bengali script (বাংলা), for Hindi use Devanagari script (हिंदी), for English use English alphabet.
-7. CRITICAL: Output ONLY the final resulting sentence. Absolutely NO introductory text, NO quotes, NO explanation of edits.
+7. CRITICAL: Output ONLY the final resulting sentence. Absolutely NO introductory text, NO quotes, NO explanation of edits.$hintsRule
 
 Input Text:
 $text

@@ -53,6 +53,13 @@ object FlowKeysCoordinator {
         deviceTier = DeviceTier.detect(appContext)
         val dsm = com.flowkeys.android.data.DataStoreManager(appContext)
         dataStoreManager = dsm
+        com.flowkeys.android.dictionary.LearnedVocabularyStore.initialize(appContext)
+        com.flowkeys.android.stats.LocalStatsRepository.initialize(appContext)
+        scope.launch {
+            dsm.isLearnedVocabEnabled.collect { enabled ->
+                com.flowkeys.android.dictionary.LearnedVocabularyStore.setEnabled(enabled)
+            }
+        }
         scope.launch {
             dsm.selectedLanguage.collect { lang ->
                 _selectedLanguage.value = lang
@@ -193,6 +200,10 @@ object FlowKeysCoordinator {
         val target = getActiveOrFocusedNode()
         val packageName = _activeDictationContext.value?.packageName ?: ""
         val language = _selectedLanguage.value
+
+        // Record 100% local usage statistics and vocabulary learning
+        com.flowkeys.android.stats.LocalStatsRepository.recordSession(text, language, packageName)
+        com.flowkeys.android.dictionary.LearnedVocabularyStore.recordDictationWords(text, language, packageName)
 
         if (target != null && target.isEditable) {
             val success = TextInsertionEngine.insertText(target, text, context)

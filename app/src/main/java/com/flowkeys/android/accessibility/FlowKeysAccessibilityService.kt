@@ -115,38 +115,67 @@ class FlowKeysAccessibilityService : AccessibilityService() {
         }
     }
 
+    private fun findFirstEditableNode(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+        if (node == null) return null
+        if (node.isEditable && FieldClassifier.isEligibleEditableField(node)) {
+            return node
+        }
+        for (i in 0 until node.childCount) {
+            val child = try { node.getChild(i) } catch (e: Exception) { null } ?: continue
+            val found = findFirstEditableNode(child)
+            if (found != null) return found
+        }
+        return null
+    }
+
     private fun handleWindowStateChanged(event: AccessibilityEvent) {
         val currentState = FlowKeysCoordinator.dictationState.value
         if (currentState is DictationState.Recording || currentState is DictationState.Processing) {
             return
         }
 
+        val windowList = try { windows } catch (e: Exception) { emptyList() }
+        val appWindow = windowList.firstOrNull { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
+        val rootNode = appWindow?.root ?: rootInActiveWindow
+        val currentPackage = event.packageName?.toString()
+            ?: rootNode?.packageName?.toString()
+            ?: lastPackageName
+
+        // If active package changed, clear previous focused node
+        if (currentPackage.isNotEmpty() && lastPackageName.isNotEmpty() && currentPackage != lastPackageName) {
+            clearPendingFocus()
+            lastFocusedNode = null
+        }
+
         val imeTop = detectImeTop()
         val node = lastFocusedNode
 
-        // Check if the previously focused node is still valid and in an active editable field
-        if (node != null && try { node.refresh() && FieldClassifier.isEligibleEditableField(node, lastPackageName) } catch (e: Exception) { false }) {
-            FlowKeysCoordinator.onFieldFocused(node, lastPackageName, lastBounds, imeTop)
+        // Check if the previously focused node is still valid and in the active package
+        val isLastNodeValid = node != null && currentPackage == lastPackageName && try {
+            (node.refresh() || node.isEditable) && FieldClassifier.isEligibleEditableField(node, currentPackage)
+        } catch (e: Exception) {
+            false
+        }
+
+        if (isLastNodeValid && node != null) {
+            FlowKeysCoordinator.onFieldFocused(node, currentPackage, lastBounds, imeTop)
             if (imeTop != null) {
-                startImeMonitor(node, lastPackageName, lastBounds)
+                startImeMonitor(node, currentPackage, lastBounds)
             }
             return
         }
 
-        // Otherwise scan active application window
-        val windowList = try { windows } catch (e: Exception) { emptyList() }
-        val appWindow = windowList.firstOrNull { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
-        val rootNode = appWindow?.root ?: rootInActiveWindow
+        // Scan active application window for focused input
         val focusedNode = rootNode?.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
-        val packageName = event.packageName?.toString() ?: lastPackageName
+            ?: if (imeTop != null) findFirstEditableNode(rootNode) else null
 
-        if (focusedNode != null && FieldClassifier.isEligibleEditableField(focusedNode, packageName)) {
+        if (focusedNode != null && FieldClassifier.isEligibleEditableField(focusedNode, currentPackage)) {
             val bounds = FieldClassifier.getBoundsInScreen(focusedNode)
             lastFocusedNode = focusedNode
-            lastPackageName = packageName
+            lastPackageName = currentPackage
             lastBounds = bounds
-            notifyFieldFocused(focusedNode, packageName, bounds)
-        } else if (imeTop == null) {
+            notifyFieldFocused(focusedNode, currentPackage, bounds)
+        } else {
             clearPendingFocus()
             lastFocusedNode = null
             FlowKeysCoordinator.onFieldUnfocused()
@@ -165,7 +194,7 @@ class FlowKeysAccessibilityService : AccessibilityService() {
         } else {
             pendingImePollJob?.cancel()
             pendingImePollJob = serviceScope.launch {
-                for (delayMs in listOf(150L, 300L, 500L)) {
+                for (delayMs in listOf(100L, 250L, 500L, 800L, 1200L)) {
                     delay(delayMs)
                     val delayedImeTop = detectImeTop()
                     android.util.Log.d("FlowKeysA11y", "delayedImeTop after ${delayMs}ms = $delayedImeTop")

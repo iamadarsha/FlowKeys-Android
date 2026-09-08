@@ -107,9 +107,23 @@ object FlowKeysCoordinator {
         var target = activeTargetNode
         if (target == null || !target.isEditable) {
             val service = accessibilityServiceRef?.get()
-            target = service?.rootInActiveWindow?.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            val root = service?.rootInActiveWindow
+            target = root?.findFocus(AccessibilityNodeInfo.FOCUS_INPUT) ?: findFirstEditableNode(root)
         }
         return target
+    }
+
+    private fun findFirstEditableNode(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+        if (node == null) return null
+        if (node.isEditable && com.flowkeys.android.accessibility.FieldClassifier.isEligibleEditableField(node)) {
+            return node
+        }
+        for (i in 0 until node.childCount) {
+            val child = try { node.getChild(i) } catch (e: Exception) { null } ?: continue
+            val found = findFirstEditableNode(child)
+            if (found != null) return found
+        }
+        return null
     }
 
     /**

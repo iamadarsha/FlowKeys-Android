@@ -42,6 +42,7 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
         format = PixelFormat.TRANSLUCENT
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         gravity = Gravity.TOP or Gravity.START
         width = dpToPx(96)
@@ -120,13 +121,9 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
                 view.visibility = View.GONE
             }
             is DictationState.FieldFocused -> {
-                if (state.imeTop != null) {
-                    view.visibility = View.VISIBLE
-                    view.alpha = 1.0f
-                    positionAboveKeyboard(state.imeTop, state.fieldBounds)
-                } else {
-                    view.visibility = View.GONE
-                }
+                view.visibility = View.VISIBLE
+                view.alpha = 1.0f
+                positionAboveKeyboard(state.imeTop, state.fieldBounds)
             }
             is DictationState.Recording,
             is DictationState.Processing,
@@ -139,12 +136,17 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
     }
 
     private fun positionAboveKeyboard(imeTop: Int?, fieldBounds: android.graphics.Rect) {
-        if (hasCustomPosition || imeTop == null) return
+        if (hasCustomPosition) return
 
         updateScreenDimensions()
-        val keyboardTop = imeTop
-        val targetY = (keyboardTop - windowParams.height - dpToPx(8))
-            .coerceIn(dpToPx(50), screenSize.y - windowParams.height - dpToPx(60))
+        val targetY: Int = if (imeTop != null && imeTop > 0) {
+            imeTop - windowParams.height - dpToPx(12)
+        } else if (fieldBounds.top > 0 && fieldBounds.top < screenSize.y) {
+            fieldBounds.top - windowParams.height - dpToPx(8)
+        } else {
+            (screenSize.y * 0.60f).toInt() - windowParams.height - dpToPx(12)
+        }.coerceIn(dpToPx(50), screenSize.y - windowParams.height - dpToPx(60))
+
         val targetX = screenSize.x - windowParams.width - dpToPx(16)
 
         windowParams.x = targetX
@@ -272,16 +274,12 @@ class FloatingPillManager(private val context: Context) : FloatingPillView.Liste
 
     private fun updateScreenDimensions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val windowMetrics = windowManager.currentWindowMetrics
-            val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
-                android.view.WindowInsets.Type.systemBars()
-            )
-            val bounds = windowMetrics.bounds
-            screenSize.x = bounds.width() - insets.left - insets.right
-            screenSize.y = bounds.height() - insets.top - insets.bottom
+            val bounds = windowManager.currentWindowMetrics.bounds
+            screenSize.x = bounds.width()
+            screenSize.y = bounds.height()
         } else {
             @Suppress("DEPRECATION")
-            windowManager.defaultDisplay.getSize(screenSize)
+            windowManager.defaultDisplay.getRealSize(screenSize)
         }
     }
 

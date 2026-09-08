@@ -61,6 +61,10 @@ object FieldClassifier {
         // Suppress FlowKeys overlay on banking and financial apps (Wispr Flow safety standard)
         if (isFinancialOrBankingPackage(packageName)) return false
 
+        // Don't show overlay on launcher unless an input is explicitly focused
+        val pkg = packageName?.lowercase() ?: ""
+        if (pkg.contains("launcher") && !node.isFocused) return false
+
         // Check inputType flags if available
         val inputType = node.inputType
         if (isPasswordInputType(inputType)) return false

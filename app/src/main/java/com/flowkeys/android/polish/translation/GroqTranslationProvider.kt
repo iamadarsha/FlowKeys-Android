@@ -46,7 +46,7 @@ object GroqTranslationProvider {
         modelName: String
     ): String? {
         try {
-            Log.d(TAG, "Translating via Groq ($modelName): '$text' (${sourceLang.code} -> ${targetLang.code})")
+            Log.d(TAG, "Translating via Groq ($modelName): [${text.length} chars, ${sourceLang.code}→${targetLang.code}]")
             val url = URL(API_URL)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
@@ -83,7 +83,7 @@ object GroqTranslationProvider {
             val responseCode = connection.responseCode
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 val responseString = connection.inputStream.bufferedReader().use { it.readText() }
-                Log.d(TAG, "Groq response ($modelName): $responseString")
+                Log.d(TAG, "Groq response ($modelName): HTTP 200, [${responseString.length} chars]")
                 val json = JSONObject(responseString)
                 val choices = json.optJSONArray("choices")
                 if (choices != null && choices.length() > 0) {

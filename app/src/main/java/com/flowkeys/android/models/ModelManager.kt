@@ -58,9 +58,13 @@ class ModelManager(private val context: Context) {
 
     /**
      * Computes the SHA-256 checksum of a downloaded file.
+     * Returns false if the file does not exist or if [expectedSha256] is blank
+     * (indicating the checksum has not yet been set in ModelManifest).
      */
     suspend fun verifyChecksum(file: File, expectedSha256: String): Boolean = withContext(Dispatchers.IO) {
         if (!file.exists()) return@withContext false
+        // Reject blank checksums — a missing checksum must never be treated as valid
+        if (expectedSha256.isBlank()) return@withContext false
         try {
             val digest = MessageDigest.getInstance("SHA-256")
             val buffer = ByteArray(8192)

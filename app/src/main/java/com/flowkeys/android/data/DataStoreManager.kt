@@ -27,6 +27,9 @@ class DataStoreManager(private val context: Context) {
         private val KEY_GROQ_API_KEY = stringPreferencesKey("groq_api_key")
         private val KEY_GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         private val KEY_TARGET_TRANSLATION = stringPreferencesKey("target_translation_language")
+        // Deprecated: contact sync was intentionally removed to eliminate spyware scanner heuristics.
+        // READ_CONTACTS is not in the manifest. The key is kept to avoid DataStore migration errors.
+        @Deprecated("Contact sync removed for security. Do not reactivate without manifest permission + prominent disclosure.")
         private val KEY_CONTACT_SYNC_ENABLED = booleanPreferencesKey("contact_sync_enabled")
         private val KEY_PROCESSING_MODE = stringPreferencesKey("processing_quality_mode")
         private val KEY_LEARNED_VOCAB_ENABLED = booleanPreferencesKey("learned_vocab_enabled")

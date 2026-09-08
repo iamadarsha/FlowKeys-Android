@@ -555,7 +555,7 @@ private fun Screen1Welcome(onNext: () -> Unit) {
             Icon(Icons.Default.Lock, contentDescription = null, tint = StitchSuccess, modifier = Modifier.size(12.dp))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "100% private. Speech processed locally on device.",
+                text = "On-device by default. Optional cloud AI is user-enabled and user-keyed.",
                 color = StitchTextMuted,
                 fontSize = 10.sp
             )

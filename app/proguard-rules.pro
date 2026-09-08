@@ -31,12 +31,15 @@
 -keep public class * extends android.app.Activity
 -keep public class * extends android.content.BroadcastReceiver
 
-# Strip debug and verbose logs from release APK
+# Strip all log levels (v/d/i/w/e/wtf) from release APK — no user data in logs
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
     public static int d(...);
     public static int i(...);
+    public static int w(...);
+    public static int e(...);
+    public static int wtf(...);
 }
 
 # Keep ML Kit Translate

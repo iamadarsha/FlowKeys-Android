@@ -7,10 +7,11 @@
         </trust-anchors>
     </base-config>
 
-    <!-- Specific secure endpoints for Groq ASR & Google AI translation -->
+    <!-- Specific secure endpoints for Groq ASR, Google AI, and Sarvam AI (all cloud-optional, user-controlled) -->
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">api.groq.com</domain>
         <domain includeSubdomains="true">generativelanguage.googleapis.com</domain>
+        <domain includeSubdomains="true">api.sarvam.ai</domain>
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

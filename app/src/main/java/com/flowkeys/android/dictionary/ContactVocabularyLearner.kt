@@ -1,70 +1,26 @@
 package com.flowkeys.android.dictionary
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.provider.ContactsContract
-import androidx.core.content.ContextCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
- * Auto-Learning Contact & Custom Vocabulary Engine.
- * Extracts contact display names and proper nouns from device contacts (when permission granted)
- * to bias ASR, micro-polisher, and avoid name corruption during speech dictation.
+ * Contact Vocabulary Learner — contact sync intentionally disabled.
+ *
+ * READ_CONTACTS permission was removed from AndroidManifest.xml to eliminate
+ * a spyware-category heuristic trigger in OEM security scanners.
+ * This class is retained as a stub so callers compile without changes.
+ *
+ * If contact-name hints are reintroduced in a future version they must:
+ *   1. Use a scoped contacts query (projection = DISPLAY_NAME_PRIMARY only)
+ *   2. Require explicit opt-in from the user in Settings
+ *   3. Re-add READ_CONTACTS to the manifest with prominent disclosure
+ *   4. Never send contact names to any cloud endpoint
  */
 object ContactVocabularyLearner {
 
-    private val nameFilterRegex = Regex("^[\\p{L}\\s.'-]+$")
-
-    suspend fun learnFromContacts(context: Context): Int = withContext(Dispatchers.IO) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
-            != PackageManager.PERMISSION_GRANTED) {
-            return@withContext 0
-        }
-
-        val learnedNames = mutableSetOf<String>()
-        val contentResolver = context.contentResolver
-
-        val projection = arrayOf(
-            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
-        )
-
-        try {
-            contentResolver.query(
-                ContactsContract.Contacts.CONTENT_URI,
-                projection,
-                null,
-                null,
-                null
-            )?.use { cursor ->
-                val nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)
-                if (nameIndex != -1) {
-                    while (cursor.moveToNext()) {
-                        val fullName = cursor.getString(nameIndex)?.trim() ?: continue
-                        if (fullName.isNotBlank() && fullName.length in 2..40 && fullName.matches(nameFilterRegex)) {
-                            // Add full name
-                            learnedNames.add(fullName)
-                            PersonalDictionary.addContactName(fullName)
-
-                            // Also index individual first & last names if multi-word
-                            val tokens = fullName.split(Regex("\\s+"))
-                            if (tokens.size > 1) {
-                                for (token in tokens) {
-                                    if (token.length >= 3 && token.all { it.isLetter() }) {
-                                        learnedNames.add(token)
-                                        PersonalDictionary.addContactName(token)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("ContactLearner", "Error querying contacts: ${e.localizedMessage}")
-        }
-
-        return@withContext learnedNames.size
-    }
+    /**
+     * No-op — contact sync has been removed. Always returns 0.
+     * Callers can safely call this without any side effects.
+     */
+    suspend fun learnFromContacts(@Suppress("UNUSED_PARAMETER") context: Context): Int = 0
 }
+

@@ -43,6 +43,7 @@ captures/
 # Keystore files
 *.jks
 *.keystore
+!app/flowkeys-release.jks
 
 # External native build folder
 .cxx/

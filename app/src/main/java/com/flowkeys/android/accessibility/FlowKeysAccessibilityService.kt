@@ -117,8 +117,7 @@ class FlowKeysAccessibilityService : AccessibilityService() {
         ensureOverlayAttached()
 
         when (event.eventType) {
-            AccessibilityEvent.TYPE_VIEW_FOCUSED,
-            AccessibilityEvent.TYPE_VIEW_CLICKED -> {
+            AccessibilityEvent.TYPE_VIEW_FOCUSED -> {
                 handleViewFocused(event)
             }
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,

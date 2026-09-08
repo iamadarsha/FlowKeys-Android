@@ -11,9 +11,6 @@
     <!-- Overlay Window Permission for Floating Pill -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <!-- Optional Contact Vocabulary Learning for Regional Names -->
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-
     <!-- Foreground Service Permissions (Android 14+ Microhone FGS) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
@@ -53,7 +50,7 @@
         <!-- Onboarding & Prominent Disclosure Activity -->
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <!-- Core Accessibility Service for Focus Detection & Text Insertion -->
         <service

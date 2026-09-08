@@ -100,9 +100,7 @@ fun SettingsScreen(
     var bubbleEnabled by remember { mutableStateOf(true) }
     var smartPolishEnabled by remember { mutableStateOf(true) }
     var autoPunctuationEnabled by remember { mutableStateOf(true) }
-    var contactSyncEnabled by remember { mutableStateOf(
-        runBlocking { dataStoreManager.isContactSyncEnabled.first() }
-    ) }
+
     var learnedContactCount by remember { mutableStateOf(PersonalDictionary.getLearnedContactCount()) }
     var cloudEnabled by remember { mutableStateOf(
         runBlocking { dataStoreManager.isCloudEnabled.first() }
@@ -122,23 +120,6 @@ fun SettingsScreen(
         runBlocking { dataStoreManager.processingQualityMode.first() }
     ) }
 
-    val contactPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            scope.launch {
-                val count = ContactVocabularyLearner.learnFromContacts(context)
-                dataStoreManager.setContactSyncEnabled(true)
-                contactSyncEnabled = true
-                learnedContactCount = PersonalDictionary.getLearnedContactCount()
-                Toast.makeText(context, "Learned $count regional contact names into memory", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            scope.launch { dataStoreManager.setContactSyncEnabled(false) }
-            contactSyncEnabled = false
-            Toast.makeText(context, "Contact permission denied. Built-in vocabulary active.", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -275,33 +256,12 @@ fun SettingsScreen(
                     .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
             ) {
                 Column {
-                    SettingsRowSwitch(
-                        icon = Icons.Default.Contacts,
-                        title = "Auto-Learn Contact Names",
-                        subtitle = "Regional name preservation (Subhashish, Debolina, Ananya)",
-                        checked = contactSyncEnabled,
-                        onCheckedChange = { enable ->
-                            if (enable) {
-                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-                                    scope.launch {
-                                        val count = ContactVocabularyLearner.learnFromContacts(context)
-                                        dataStoreManager.setContactSyncEnabled(true)
-                                        contactSyncEnabled = true
-                                        learnedContactCount = PersonalDictionary.getLearnedContactCount()
-                                        Toast.makeText(context, "Learned $count contact names", Toast.LENGTH_SHORT).show()
-                                    }
-                                } else {
-                                    contactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
-                                }
-                            } else {
-                                scope.launch {
-                                    dataStoreManager.setContactSyncEnabled(false)
-                                    PersonalDictionary.clearContacts()
-                                    contactSyncEnabled = false
-                                    learnedContactCount = 0
-                                }
-                            }
-                        }
+                    SettingsRowClickable(
+                        icon = Icons.Default.Shield,
+                        title = "Zero Telemetry Guarantee",
+                        subtitle = "100% private: Contacts, passwords, & chats are never accessed",
+                        trailingTag = "ACTIVE",
+                        onClick = {}
                     )
                     SettingsDivider()
                     SettingsRowClickable(

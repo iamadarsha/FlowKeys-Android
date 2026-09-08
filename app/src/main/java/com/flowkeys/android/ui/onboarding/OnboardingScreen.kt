@@ -985,7 +985,7 @@ private fun Screen3PrivacyPermissions(
         Spacer(modifier = Modifier.height(6.dp))
 
         PermissionCard(
-            title = "Accessibility Service",
+            title = "Accessibility",
             subtitle = "Required: Detects keyboard & types text into WhatsApp/apps.",
             icon = Icons.Default.TextFields,
             isGranted = hasAccessibility,
@@ -1188,26 +1188,31 @@ private fun PermissionCard(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = title,
                             color = StitchTextPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(if (isGranted) StitchSuccess.copy(alpha = 0.2f) else StitchSurface3)
-                                .padding(horizontal = 5.dp, vertical = 1.dp)
+                                .padding(horizontal = 5.dp, vertical = 1.5.dp)
                         ) {
                             Text(
                                 text = if (isGranted) "ACTIVE" else "REQUIRED",
                                 color = if (isGranted) StitchSuccess else StitchTextMuted,
                                 fontSize = 8.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }

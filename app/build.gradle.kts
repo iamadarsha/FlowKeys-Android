@@ -22,6 +22,16 @@ android {
     }
 
     signingConfigs {
+        create("release") {
+            storeFile = file("flowkeys-release.jks")
+            storePassword = "flowkeys2026"
+            keyAlias = "flowkeys"
+            keyPassword = "flowkeys2026"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
         getByName("debug") {
             enableV1Signing = true
             enableV2Signing = true
@@ -36,7 +46,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug") // Debug signing for development
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             applicationIdSuffix = ".debug"

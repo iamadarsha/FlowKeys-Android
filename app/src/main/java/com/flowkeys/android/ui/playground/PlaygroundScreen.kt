@@ -29,14 +29,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.FontDownload
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -80,6 +80,10 @@ import com.flowkeys.android.ui.theme.StitchTextPrimary
 import com.flowkeys.android.ui.theme.StitchTextSecondary
 import kotlinx.coroutines.launch
 
+/**
+ * Human-Friendly Dictation Playground.
+ * Designed for effortless, warm, everyday use by any person without technical jargon.
+ */
 @Composable
 fun PlaygroundScreen() {
     val context = LocalContext.current
@@ -89,12 +93,6 @@ fun PlaygroundScreen() {
     val scriptMode by FlowKeysCoordinator.scriptMode.collectAsState()
     val dictationState by FlowKeysCoordinator.dictationState.collectAsState()
     val currentTargetLang by FlowKeysCoordinator.targetTranslationLanguage.collectAsState()
-    val translationMode = when (currentTargetLang) {
-        Language.ENGLISH -> TranslationEngine.TranslationMode.TO_ENGLISH
-        Language.BENGALI -> TranslationEngine.TranslationMode.TO_BENGALI
-        Language.HINDI -> TranslationEngine.TranslationMode.TO_HINDI
-        null -> TranslationEngine.TranslationMode.DIRECT_DICTATION
-    }
 
     val dataStoreManager = remember { com.flowkeys.android.data.DataStoreManager(context) }
     val groqKey by dataStoreManager.groqApiKey.collectAsState(initial = "")
@@ -123,11 +121,11 @@ fun PlaygroundScreen() {
 
     val isRecording = dictationState is DictationState.Recording
 
-    // Infinite breathing animation for Stitch tactile centerpiece
+    // Infinite breathing animation for center mic trigger
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
-        targetValue = if (isRecording) 1.14f else 1.04f,
+        targetValue = if (isRecording) 1.15f else 1.04f,
         animationSpec = infiniteRepeatable(
             animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -139,29 +137,29 @@ fun PlaygroundScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(StitchCanvas)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Stitch Top Telemetry Anchor
+        // Privacy and Status Pill
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(9999.dp))
                 .background(StitchSurface2)
                 .border(1.dp, StitchBorderSubtle, RoundedCornerShape(9999.dp))
-                .padding(horizontal = 14.dp, vertical = 6.dp),
+                .padding(horizontal = 14.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(7.dp)
                     .clip(CircleShape)
                     .background(StitchSuccess)
             )
             Text(
-                text = "ENGINE READY",
+                text = "100% PRIVATE",
                 color = StitchTextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 11.sp,
@@ -169,45 +167,45 @@ fun PlaygroundScreen() {
             )
             Text(text = "•", color = StitchTextMuted, fontSize = 10.sp)
             Text(
-                text = "Dynamic Streaming",
+                text = "Voice Stays On Your Phone",
                 color = StitchSuccess,
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.sp
             )
         }
 
-        // Stitch Concentric Tactile Hero Mic Trigger
+        // Hero Microphone Button
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(180.dp)
+                .size(136.dp)
                 .padding(top = 2.dp)
         ) {
-            // Outer breathing wave ring
+            // Outer breathing ring
             Box(
                 modifier = Modifier
-                    .size(170.dp)
+                    .size(130.dp)
                     .scale(pulseScale)
                     .clip(CircleShape)
-                    .background(if (isRecording) StitchAccentCoral.copy(alpha = 0.15f) else StitchSurface1.copy(alpha = 0.5f))
+                    .background(if (isRecording) StitchAccentCoral.copy(alpha = 0.18f) else StitchSurface1.copy(alpha = 0.5f))
             )
-            // Mid structural ring
+            // Mid ring
             Box(
                 modifier = Modifier
-                    .size(126.dp)
+                    .size(98.dp)
                     .clip(CircleShape)
                     .background(StitchSurface2)
                     .border(
                         width = 1.dp,
-                        color = if (isRecording) StitchAccentCoral.copy(alpha = 0.4f) else StitchBorderSubtle,
+                        color = if (isRecording) StitchAccentCoral.copy(alpha = 0.45f) else StitchBorderSubtle,
                         shape = CircleShape
                     )
             )
-            // Core tactile button (84dp touch target)
+            // Core tactile button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(84.dp)
+                    .size(68.dp)
                     .clip(CircleShape)
                     .background(if (isRecording) StitchAccentCoral else StitchSurface3)
                     .border(
@@ -235,78 +233,246 @@ fun PlaygroundScreen() {
                     imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
                     contentDescription = if (isRecording) "Stop Dictation" else "Start Dictation",
                     tint = Color.White,
-                    modifier = Modifier.size(34.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }
 
+        // Action Status Title & Subtitle
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = if (isRecording) "Listening in ${selectedLang.displayName}…" else "Tap to Speak Anywhere",
+                text = if (isRecording) "Listening in ${selectedLang.displayName.split(" ").first()}…" else "Tap to Speak",
                 color = StitchTextPrimary,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 15.sp
+                fontSize = 17.sp
             )
             Text(
-                text = if (isRecording) "Live preview streaming active" else "Sub-200ms Indic Polish & Transliterator",
+                text = if (isRecording) "Tap the button when you're done speaking" else "FlowKeys types and polishes your words instantly",
                 color = if (isRecording) StitchAccentPeach else StitchTextMuted,
                 fontSize = 12.sp
             )
         }
 
-        // Native Language Quick Selector Pills
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Section 1: "I am speaking" Language Selector
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
         ) {
-            Language.entries.forEach { lang ->
-                val isSelected = lang == selectedLang
-                val glyph = when (lang) {
-                    Language.BENGALI -> "অ"
-                    Language.HINDI -> "अ"
-                    Language.ENGLISH -> "Aa"
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) StitchSurface3 else StitchSurface1)
-                        .border(
-                            width = 1.5.dp,
-                            color = if (isSelected) StitchAccentCoral else StitchBorderSubtle,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable { FlowKeysCoordinator.setLanguage(lang) }
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier.padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "I AM SPEAKING",
+                    color = StitchAccentCoral,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.6.sp
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    Language.entries.forEach { lang ->
+                        val isSelected = lang == selectedLang
+                        val (glyph, label, sublabel) = when (lang) {
+                            Language.BENGALI -> Triple("অ", "বাংলা", "Bengali")
+                            Language.HINDI -> Triple("अ", "हिन्दी", "Hindi")
+                            Language.ENGLISH -> Triple("Aa", "English", "Global")
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) StitchSurface3 else StitchSurface2)
+                                .border(
+                                    width = 1.5.dp,
+                                    color = if (isSelected) StitchAccentCoral else Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    FlowKeysCoordinator.setLanguage(lang)
+                                    // Reset target translation if same language
+                                    if (currentTargetLang == lang) {
+                                        FlowKeysCoordinator.setTargetTranslation(null)
+                                    }
+                                }
+                                .padding(vertical = 10.dp, horizontal = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = glyph,
+                                    color = if (isSelected) StitchAccentCoral else StitchTextSecondary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) StitchTextPrimary else StitchTextSecondary,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = sublabel,
+                                    color = if (isSelected) StitchAccentPeach else StitchTextMuted,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Section 2: "Type as" Output Style Selector
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+        ) {
+            Column(
+                modifier = Modifier.padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "TYPE MY WORDS AS",
+                    color = StitchAccentPeach,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.6.sp
+                )
+
+                if (selectedLang == Language.ENGLISH) {
+                    // When speaking English
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = glyph,
-                            color = if (isSelected) StitchAccentCoral else StitchTextSecondary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
+                        HumanModeOptionCard(
+                            title = "English",
+                            subtitle = "Standard text",
+                            isSelected = currentTargetLang == null,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.NATIVE_SCRIPT)
+                                FlowKeysCoordinator.setTargetTranslation(null)
+                            }
                         )
-                        Text(
-                            text = lang.displayName.split(" ").first(),
-                            color = if (isSelected) StitchTextPrimary else StitchTextSecondary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        HumanModeOptionCard(
+                            title = "→ বাংলা",
+                            subtitle = "Bengali",
+                            isSelected = currentTargetLang == Language.BENGALI,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.TRANSLATED_ENGLISH)
+                                FlowKeysCoordinator.setTargetTranslation(Language.BENGALI)
+                                if (textValue.isNotBlank()) {
+                                    scope.launch {
+                                        textValue = TranslationEngine.translate(
+                                            textValue,
+                                            selectedLang,
+                                            Language.BENGALI,
+                                            apiKey = groqKey.ifBlank { null },
+                                            geminiKey = geminiKey.ifBlank { null }
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                        HumanModeOptionCard(
+                            title = "→ हिन्दी",
+                            subtitle = "Hindi",
+                            isSelected = currentTargetLang == Language.HINDI,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.TRANSLATED_ENGLISH)
+                                FlowKeysCoordinator.setTargetTranslation(Language.HINDI)
+                                if (textValue.isNotBlank()) {
+                                    scope.launch {
+                                        textValue = TranslationEngine.translate(
+                                            textValue,
+                                            selectedLang,
+                                            Language.HINDI,
+                                            apiKey = groqKey.ifBlank { null },
+                                            geminiKey = geminiKey.ifBlank { null }
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                } else {
+                    // When speaking Bengali or Hindi
+                    val isNative = scriptMode == ScriptMode.NATIVE_SCRIPT && currentTargetLang == null
+                    val isTranslateEn = currentTargetLang == Language.ENGLISH || scriptMode == ScriptMode.TRANSLATED_ENGLISH
+                    val isCasualLatin = scriptMode == ScriptMode.PHONETIC_LATIN
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        HumanModeOptionCard(
+                            title = if (selectedLang == Language.BENGALI) "বাংলা Script" else "हिन्दी Script",
+                            subtitle = "Original native",
+                            isSelected = isNative,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.NATIVE_SCRIPT)
+                                FlowKeysCoordinator.setTargetTranslation(null)
+                            }
+                        )
+                        HumanModeOptionCard(
+                            title = "→ English",
+                            subtitle = "Auto translate",
+                            isSelected = isTranslateEn,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.TRANSLATED_ENGLISH)
+                                FlowKeysCoordinator.setTargetTranslation(Language.ENGLISH)
+                                if (textValue.isNotBlank()) {
+                                    scope.launch {
+                                        textValue = TranslationEngine.translate(
+                                            textValue,
+                                            selectedLang,
+                                            Language.ENGLISH,
+                                            apiKey = groqKey.ifBlank { null },
+                                            geminiKey = geminiKey.ifBlank { null }
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                        HumanModeOptionCard(
+                            title = if (selectedLang == Language.BENGALI) "Benglish" else "Hinglish",
+                            subtitle = "English letters",
+                            isSelected = isCasualLatin,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                FlowKeysCoordinator.setScriptMode(ScriptMode.PHONETIC_LATIN)
+                                FlowKeysCoordinator.setTargetTranslation(null)
+                            }
                         )
                     }
                 }
             }
         }
 
-        // Tri-Mode Script Output Engine (Translated English / Native Script / Benglish-Hinglish Latin)
+        // Section 3: Live Spoken Text (Interactive Sandbox)
         Card(
             colors = CardDefaults.cardColors(containerColor = StitchSurface1),
             shape = RoundedCornerShape(14.dp),
@@ -314,180 +480,7 @@ fun PlaygroundScreen() {
                 .fillMaxWidth()
                 .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
         ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FontDownload,
-                        contentDescription = null,
-                        tint = StitchAccentCoral,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "SCRIPT OUTPUT MODE",
-                        color = StitchAccentCoral,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ScriptModeButton(
-                        label = "→ English",
-                        sublabel = "Translated",
-                        isSelected = scriptMode == ScriptMode.TRANSLATED_ENGLISH,
-                        modifier = Modifier.weight(1f),
-                        onClick = { FlowKeysCoordinator.setScriptMode(ScriptMode.TRANSLATED_ENGLISH) }
-                    )
-                    ScriptModeButton(
-                        label = "Native",
-                        sublabel = if (selectedLang == Language.BENGALI) "বাংলা" else if (selectedLang == Language.HINDI) "हिन्दी" else "English",
-                        isSelected = scriptMode == ScriptMode.NATIVE_SCRIPT,
-                        modifier = Modifier.weight(1f),
-                        onClick = { FlowKeysCoordinator.setScriptMode(ScriptMode.NATIVE_SCRIPT) }
-                    )
-                    ScriptModeButton(
-                        label = "Latin",
-                        sublabel = if (selectedLang == Language.BENGALI) "Benglish" else "Hinglish",
-                        isSelected = scriptMode == ScriptMode.PHONETIC_LATIN,
-                        modifier = Modifier.weight(1f),
-                        onClick = { FlowKeysCoordinator.setScriptMode(ScriptMode.PHONETIC_LATIN) }
-                    )
-                }
-            }
-        }
-
-        // Tri-Directional Translation Bar
-        Card(
-            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Translate,
-                        contentDescription = null,
-                        tint = StitchAccentPeach,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "EXPLICIT TRANSLATION OVERRIDE",
-                        color = StitchAccentPeach,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TranslationModeButton(
-                        label = "Auto (Script)",
-                        isSelected = translationMode == TranslationEngine.TranslationMode.DIRECT_DICTATION,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            FlowKeysCoordinator.setTargetTranslation(null)
-                        }
-                    )
-                    TranslationModeButton(
-                        label = "→ English",
-                        isSelected = translationMode == TranslationEngine.TranslationMode.TO_ENGLISH,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            val mode = TranslationEngine.TranslationMode.TO_ENGLISH
-                            FlowKeysCoordinator.setTargetTranslation(mode.targetLanguage)
-                            if (textValue.isNotBlank()) {
-                                scope.launch {
-                                    textValue = TranslationEngine.translate(
-                                        textValue,
-                                        selectedLang,
-                                        mode.targetLanguage!!,
-                                        apiKey = groqKey.ifBlank { null },
-                                        geminiKey = geminiKey.ifBlank { null }
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TranslationModeButton(
-                        label = "→ বাংলা (BN)",
-                        isSelected = translationMode == TranslationEngine.TranslationMode.TO_BENGALI,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            val mode = TranslationEngine.TranslationMode.TO_BENGALI
-                            FlowKeysCoordinator.setTargetTranslation(mode.targetLanguage)
-                            if (textValue.isNotBlank()) {
-                                scope.launch {
-                                    textValue = TranslationEngine.translate(
-                                        textValue,
-                                        selectedLang,
-                                        mode.targetLanguage!!,
-                                        apiKey = groqKey.ifBlank { null },
-                                        geminiKey = geminiKey.ifBlank { null }
-                                    )
-                                }
-                            }
-                        }
-                    )
-                    TranslationModeButton(
-                        label = "→ हिन्दी (HI)",
-                        isSelected = translationMode == TranslationEngine.TranslationMode.TO_HINDI,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            val mode = TranslationEngine.TranslationMode.TO_HINDI
-                            FlowKeysCoordinator.setTargetTranslation(mode.targetLanguage)
-                            if (textValue.isNotBlank()) {
-                                scope.launch {
-                                    textValue = TranslationEngine.translate(
-                                        textValue,
-                                        selectedLang,
-                                        mode.targetLanguage!!,
-                                        apiKey = groqKey.ifBlank { null },
-                                        geminiKey = geminiKey.ifBlank { null }
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
-
-        // Interactive Editable Sandbox Card with Action Bar
-        Card(
-            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -495,7 +488,7 @@ fun PlaygroundScreen() {
                 ) {
                     val wordCount = if (textValue.isBlank()) 0 else textValue.trim().split(Regex("\\s+")).size
                     Text(
-                        text = "SANDBOX • $wordCount words",
+                        text = "LIVE DICTATION • $wordCount words",
                         color = StitchTextMuted,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -503,7 +496,7 @@ fun PlaygroundScreen() {
                     )
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (textValue.isNotBlank()) {
@@ -513,7 +506,7 @@ fun PlaygroundScreen() {
                                     .background(StitchSurface2)
                                     .clickable {
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        val clip = ClipData.newPlainText("FlowKeys Sandbox", textValue)
+                                        val clip = ClipData.newPlainText("FlowKeys", textValue)
                                         clipboard.setPrimaryClip(clip)
                                         Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
                                     }
@@ -569,17 +562,17 @@ fun PlaygroundScreen() {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
                     value = textValue,
                     onValueChange = { textValue = it },
                     placeholder = {
                         Text(
-                            text = "Tap here to focus. Speak in ${selectedLang.displayName} (${scriptMode.displayName}) and watch FlowKeys stream and insert polished text…",
+                            text = "Tap the mic above and speak in ${selectedLang.displayName.split(" ").first()}. Your polished words appear right here…",
                             color = StitchTextMuted,
                             fontSize = 13.sp,
-                            lineHeight = 18.sp
+                            lineHeight = 19.sp
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
@@ -593,137 +586,101 @@ fun PlaygroundScreen() {
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp)
+                        .height(120.dp)
                 )
             }
         }
 
-        // Quick Telemetry Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Section 4: Friendly Everyday Usage Tip
+        Card(
+            colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
         ) {
-            TelemetryMiniCard(
-                icon = Icons.Default.WifiOff,
-                title = "Offline",
-                status = "Zero Cloud",
-                modifier = Modifier.weight(1f)
-            )
-            TelemetryMiniCard(
-                icon = Icons.Default.Bolt,
-                title = "Engine",
-                status = "< 3ms Polish",
-                modifier = Modifier.weight(1f)
-            )
-            TelemetryMiniCard(
-                icon = Icons.Default.Mic,
-                title = "VAD",
-                status = "Auto-Stop",
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(StitchSurface2)
+                        .border(1.dp, StitchBorderSubtle, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = StitchAccentCoral,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Use FlowKeys Anywhere",
+                        color = StitchTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        text = "Open WhatsApp, Gmail, or Notes and tap any text box. The FlowKeys floating mic appears right above your keyboard so you can speak and auto-type directly into your chats!",
+                        color = StitchTextMuted,
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
 @Composable
-private fun ScriptModeButton(
-    label: String,
-    sublabel: String,
+private fun HumanModeOptionCard(
+    title: String,
+    subtitle: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.18f) else StitchSurface2)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) StitchSurface3 else StitchSurface2)
             .border(
-                width = 1.dp,
+                width = 1.5.dp,
                 color = if (isSelected) StitchAccentCoral else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = label,
-                color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                fontSize = 11.5.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = sublabel,
-                color = if (isSelected) StitchAccentPeach else StitchTextMuted,
-                fontSize = 10.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun TranslationModeButton(
-    label: String,
-    isSelected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) StitchAccentCoral.copy(alpha = 0.18f) else StitchSurface2)
-            .border(
-                width = 1.dp,
-                color = if (isSelected) StitchAccentCoral else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(12.dp)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 6.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
-            color = if (isSelected) StitchAccentCoral else StitchTextSecondary,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-            fontSize = 11.5.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun TelemetryMiniCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    status: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = StitchSurface1),
-        shape = RoundedCornerShape(12.dp),
-        modifier = modifier.border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
-    ) {
         Column(
-            modifier = Modifier.padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = StitchSuccess,
-                modifier = Modifier.size(18.dp)
+            Text(
+                text = title,
+                color = if (isSelected) StitchAccentCoral else StitchTextPrimary,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                fontSize = 12.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = title, color = StitchTextMuted, fontSize = 11.sp)
-            Text(text = status, color = StitchTextPrimary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+            Text(
+                text = subtitle,
+                color = if (isSelected) StitchAccentPeach else StitchTextMuted,
+                fontSize = 10.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

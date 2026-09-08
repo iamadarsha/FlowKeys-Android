@@ -156,23 +156,22 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .border(1.dp, StitchBorderSubtle, RoundedCornerShape(12.dp))
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
+                                .size(7.dp)
                                 .clip(CircleShape)
                                 .background(StitchSuccess)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "ZERO TELEMETRY ACTIVE",
+                            text = "100% PRIVATE & SECURE",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = StitchSuccess,
@@ -180,10 +179,9 @@ fun SettingsScreen(
                         )
                     }
                     Text(
-                        text = "SANDBOX ISOLATED",
-                        fontSize = 10.sp,
-                        color = StitchTextMuted,
-                        fontWeight = FontWeight.Medium
+                        text = "Your voice never leaves your device",
+                        fontSize = 12.sp,
+                        color = StitchTextSecondary
                     )
                 }
             }
@@ -191,7 +189,7 @@ fun SettingsScreen(
 
         // Section 1: Dictation
         item {
-            SettingsSectionHeader(title = "DICTATION", subtitle = "ENGINE v4.2")
+            SettingsSectionHeader(title = "VOICE & DICTATION", subtitle = "SYSTEM INPUT")
             Card(
                 colors = CardDefaults.cardColors(containerColor = StitchSurface1),
                 shape = RoundedCornerShape(14.dp),
@@ -204,24 +202,24 @@ fun SettingsScreen(
                         icon = null,
                         customBadge = "বা",
                         title = "বাংলা (Bengali)",
-                        subtitle = "Indic Conformer v4.2 · Direct DSP",
+                        subtitle = "Primary Language · Instant Voice Recognition",
                         trailingTag = "DEFAULT",
                         onClick = {}
                     )
                     SettingsDivider()
                     SettingsRowSwitch(
                         icon = Icons.Default.BubbleChart,
-                        title = "FlowKeys Floating Pill",
-                        subtitle = "Docked Right · Auto-shows with keyboard",
+                        title = "Floating Keyboard Mic",
+                        subtitle = "Floats right above your keyboard in any app",
                         checked = bubbleEnabled,
                         onCheckedChange = { bubbleEnabled = it }
                     )
                     SettingsDivider()
                     SettingsRowBadge(
                         icon = Icons.Default.Terminal,
-                        title = "Input Behavior",
-                        subtitle = "Direct Accessibility Injection · Zero clipboard trace",
-                        badge = "SECURE",
+                        title = "Direct Auto-Type",
+                        subtitle = "Types directly into active chat boxes without copying",
+                        badge = "ACTIVE",
                         badgeColor = StitchSuccess
                     )
                 }
@@ -230,7 +228,7 @@ fun SettingsScreen(
 
         // Section 2: Smart Writing
         item {
-            SettingsSectionHeader(title = "SMART WRITING", subtitle = "ON-DEVICE POLISH")
+            SettingsSectionHeader(title = "SMART WRITING", subtitle = "INTELLIGENT POLISH")
             Card(
                 colors = CardDefaults.cardColors(containerColor = StitchSurface1),
                 shape = RoundedCornerShape(14.dp),
@@ -242,7 +240,7 @@ fun SettingsScreen(
                     SettingsRowSwitch(
                         icon = Icons.Default.AutoFixHigh,
                         title = "Smart Polish",
-                        subtitle = "Active (Sub-3ms conversational grammar)",
+                        subtitle = "Cleans hesitations, grammar & punctuation",
                         checked = smartPolishEnabled,
                         onCheckedChange = { smartPolishEnabled = it }
                     )
@@ -740,6 +738,29 @@ fun SettingsScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Section: Setup & Permissions Guide
+        item {
+            SettingsSectionHeader(title = "SETUP & PERMISSIONS", subtitle = "QUICK START GUIDE")
+            Card(
+                colors = CardDefaults.cardColors(containerColor = StitchSurface1),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, StitchBorderSubtle, RoundedCornerShape(14.dp))
+            ) {
+                Column {
+                    SettingsRowClickable(
+                        icon = Icons.Default.BubbleChart,
+                        title = "Replay Interactive Setup Guide",
+                        subtitle = "Test floating mic setup and ensure all permissions are granted",
+                        onClick = {
+                            context.startActivity(Intent(context, OnboardingActivity::class.java))
+                        }
+                    )
                 }
             }
         }

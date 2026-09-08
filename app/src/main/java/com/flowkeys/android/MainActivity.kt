@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity() {
                                                 )
                                                 Spacer(modifier = Modifier.width(5.dp))
                                                 Text(
-                                                    text = "ON-DEVICE",
+                                                    text = "PRIVATE & READY",
                                                     color = FlowKeysAccent,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 10.sp,
@@ -169,21 +169,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            actions = {
-                                if (!isSubScreen) {
-                                    IconButton(
-                                        onClick = {
-                                            startActivity(Intent(this@MainActivity, OnboardingActivity::class.java))
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Settings,
-                                            contentDescription = "Setup & Permissions",
-                                            tint = StitchTextSecondary
-                                        )
-                                    }
-                                }
-                            },
+                            actions = {},
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = FlowKeysSurface
                             )
